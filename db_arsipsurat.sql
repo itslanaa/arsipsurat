@@ -62,18 +62,19 @@ CREATE TABLE `arsip_files` (
   `nama_file_asli` varchar(255) NOT NULL,
   `nama_file_unik` varchar(255) NOT NULL,
   `path_file` varchar(255) NOT NULL,
-  `filesize` bigint DEFAULT NULL
+  `filesize` bigint DEFAULT NULL,
+  `id_surat_masuk_file` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `arsip_files`
 --
 
-INSERT INTO `arsip_files` (`id`, `id_arsip`, `nama_file_asli`, `nama_file_unik`, `path_file`, `filesize`) VALUES
-(7, 9, 'SK Camat Cibunbulang.docx', 'arsip-68930301167ec.docx', 'uploads/arsip/arsip-68930301167ec.docx', 45892),
-(8, 8, 'Evaluasi Kinerja Pegawai.docx', 'arsip-68942837784bb.docx', 'uploads/arsip/arsip-68942837784bb.docx', 12482),
-(9, 9, 'SK Camat Cibunbulang (1).docx', 'arsip-68a7d969c0502.docx', 'uploads/arsip/arsip-68a7d969c0502.docx', 45892),
-(10, 9, 'Daftar Hadir PL.pdf', 'arsip-68a7d98515281.pdf', 'uploads/arsip/arsip-68a7d98515281.pdf', 128580);
+INSERT INTO `arsip_files` (`id`, `id_arsip`, `nama_file_asli`, `nama_file_unik`, `path_file`, `filesize`, `id_surat_masuk_file`) VALUES
+(7, 9, 'SK Camat Cibunbulang.docx', 'arsip-68930301167ec.docx', 'uploads/arsip/arsip-68930301167ec.docx', 45892, NULL),
+(8, 8, 'Evaluasi Kinerja Pegawai.docx', 'arsip-68942837784bb.docx', 'uploads/arsip/arsip-68942837784bb.docx', 12482, NULL),
+(9, 9, 'SK Camat Cibunbulang (1).docx', 'arsip-68a7d969c0502.docx', 'uploads/arsip/arsip-68a7d969c0502.docx', 45892, NULL),
+(10, 9, 'Daftar Hadir PL.pdf', 'arsip-68a7d98515281.pdf', 'uploads/arsip/arsip-68a7d98515281.pdf', 128580, NULL);
 
 -- --------------------------------------------------------
 
@@ -322,7 +323,8 @@ ALTER TABLE `arsip`
 --
 ALTER TABLE `arsip_files`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_arsip` (`id_arsip`);
+  ADD KEY `id_arsip` (`id_arsip`),
+  ADD KEY `id_surat_masuk_file` (`id_surat_masuk_file`);
 
 --
 -- Indexes for table `kategori_arsip`
@@ -463,7 +465,8 @@ ALTER TABLE `arsip`
 -- Constraints for table `arsip_files`
 --
 ALTER TABLE `arsip_files`
-  ADD CONSTRAINT `arsip_files_ibfk_1` FOREIGN KEY (`id_arsip`) REFERENCES `arsip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `arsip_files_ibfk_1` FOREIGN KEY (`id_arsip`) REFERENCES `arsip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `arsip_files_ibfk_2` FOREIGN KEY (`id_surat_masuk_file`) REFERENCES `surat_masuk_files` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `login_history`
