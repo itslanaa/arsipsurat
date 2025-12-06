@@ -164,6 +164,60 @@ INSERT INTO `login_history` (`id`, `id_user`, `login_time`, `ip_address`, `user_
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `surat_masuk`
+--
+
+CREATE TABLE `surat_masuk` (
+  `id` int NOT NULL,
+  `nomor_agenda` varchar(50) NOT NULL,
+  `tanggal_terima` date NOT NULL,
+  `asal_surat` varchar(150) NOT NULL,
+  `perihal` varchar(255) NOT NULL,
+  `kode_klasifikasi` varchar(50) NOT NULL,
+  `ringkasan` text,
+  `instruksi_camat` text,
+  `disposisi_sekcam` text,
+  `unit_pengolah` varchar(100) DEFAULT NULL,
+  `status` enum('diterima','instruksi_camat','sekcam','distribusi_umpeg','diproses_unit','selesai') NOT NULL DEFAULT 'diterima',
+  `id_user_pencatat` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `surat_masuk`
+--
+
+INSERT INTO `surat_masuk` (`id`, `nomor_agenda`, `tanggal_terima`, `asal_surat`, `perihal`, `kode_klasifikasi`, `ringkasan`, `instruksi_camat`, `disposisi_sekcam`, `unit_pengolah`, `status`, `id_user_pencatat`, `created_at`) VALUES
+(1, '01/REG/SM/2025', '2025-09-10', 'Sekretariat Daerah', 'Undangan Rakor Stunting', '800.1', 'Undangan rapat koordinasi penanganan stunting tingkat kabupaten.', 'Mohon hadir dan siapkan bahan paparan.', 'Sekcam: tugaskan ke Umpeg, hadirkan staf terkait.', 'Umpeg', 'distribusi_umpeg', 1, '2025-09-10 10:15:00'),
+(2, '02/REG/SM/2025', '2025-09-11', 'Disdukcapil', 'Permintaan Data Penduduk', '470', 'Permintaan data agregat kependudukan untuk keperluan perencanaan.', 'Review dan pastikan data terbaru.', 'Sekcam: teruskan ke Kasi Pemerintahan, balas paling lambat 3 hari.', 'Pemerintahan', 'sekcam', 1, '2025-09-11 08:10:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `surat_masuk_files`
+--
+
+CREATE TABLE `surat_masuk_files` (
+  `id` int NOT NULL,
+  `id_surat_masuk` int NOT NULL,
+  `nama_file_asli` varchar(255) NOT NULL,
+  `nama_file_unik` varchar(255) NOT NULL,
+  `path_file` varchar(255) NOT NULL,
+  `filesize` bigint DEFAULT NULL,
+  `jenis_lampiran` varchar(50) DEFAULT 'lampiran'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `surat_masuk_files`
+--
+
+INSERT INTO `surat_masuk_files` (`id`, `id_surat_masuk`, `nama_file_asli`, `nama_file_unik`, `path_file`, `filesize`, `jenis_lampiran`) VALUES
+(1, 1, 'kartu-disposisi-rakor.pdf', 'sm-01.pdf', 'uploads/surat_masuk/sm-01.pdf', 204800, 'kartu_disposisi'),
+(2, 2, 'scan-surat-disdukcapil.pdf', 'sm-02.pdf', 'uploads/surat_masuk/sm-02.pdf', 1048576, 'scan_surat');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pejabat`
 --
 
@@ -300,6 +354,22 @@ ALTER TABLE `template_surat`
   ADD UNIQUE KEY `kode_template` (`kode_template`);
 
 --
+-- Indexes for table `surat_masuk`
+--
+ALTER TABLE `surat_masuk`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_kode` (`kode_klasifikasi`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_unit` (`unit_pengolah`);
+
+--
+-- Indexes for table `surat_masuk_files`
+--
+ALTER TABLE `surat_masuk_files`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_surat_masuk` (`id_surat_masuk`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -359,6 +429,18 @@ ALTER TABLE `users`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `surat_masuk`
+--
+ALTER TABLE `surat_masuk`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `surat_masuk_files`
+--
+ALTER TABLE `surat_masuk_files`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -380,6 +462,18 @@ ALTER TABLE `arsip_files`
 --
 ALTER TABLE `login_history`
   ADD CONSTRAINT `login_history_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `surat_masuk`
+--
+ALTER TABLE `surat_masuk`
+  ADD CONSTRAINT `surat_masuk_ibfk_1` FOREIGN KEY (`id_user_pencatat`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `surat_masuk_files`
+--
+ALTER TABLE `surat_masuk_files`
+  ADD CONSTRAINT `surat_masuk_files_ibfk_1` FOREIGN KEY (`id_surat_masuk`) REFERENCES `surat_masuk` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
