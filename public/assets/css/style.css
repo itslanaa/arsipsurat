@@ -1,0 +1,49 @@
+/* Menggunakan font Inter dari Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f9fafb; /* Warna latar belakang sedikit abu-abu */
+}
+
+/* Transisi halus untuk link di sidebar */
+.nav-link {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    border-left: 3px solid transparent;
+}
+
+/* Gaya untuk link sidebar yang aktif */
+.active-link {
+    background-color: #eef2ff; /* Warna lavender muda */
+    color: #312e81; /* Warna indigo gelap */
+    font-weight: 600;
+    border-left-color: #4f46e5; /* Warna indigo */
+}
+
+/* Style untuk pratinjau surat agar terlihat seperti kertas A4 */
+.preview-container {
+    background: white;
+    padding: 2.5rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 210mm;
+    min-height: 297mm;
+    margin: auto;
+    transform-origin: top center;
+    font-family: 'Times New Roman', Times, serif; /* Font standar untuk surat resmi */
+}
+
+.kop-surat {
+    border-bottom: 4px double black;
+    padding-bottom: 0.75rem;
+}
+
+/* Menghilangkan panah default pada input number */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}

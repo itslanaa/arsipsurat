@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /arsipsurat/public
+
+    # Mengalihkan semua request yang bukan file atau direktori yang ada
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # ke index.php dengan parameter url
+    RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
+</IfModule>
