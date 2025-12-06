@@ -44,6 +44,13 @@ class Arsip_model {
         return $this->db->single();
     }
 
+    public function getArsipBySuratMasuk(int $idSuratMasuk)
+    {
+        $this->db->query("SELECT * FROM {$this->table} WHERE id_surat_masuk = :id_surat_masuk");
+        $this->db->bind('id_surat_masuk', $idSuratMasuk);
+        return $this->db->resultSet();
+    }
+
     public function tambahDataArsip($data, $files)
     {
         $query = "INSERT INTO " . $this->table . " (judul, id_kategori, tgl_upload, author, id_user_uploader, id_surat_masuk, kode_klasifikasi)
@@ -80,6 +87,27 @@ class Arsip_model {
             }
         }
         return $arsipId;
+    }
+
+    public function salinLampiranSuratMasukKeArsip(int $idArsip, array $lampiran)
+    {
+        $copied = $this->salinLampiranSuratMasuk($lampiran);
+        if (!$copied) {
+            return false;
+        }
+
+        $queryFile = "INSERT INTO {$this->files_table} (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
+            . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+        $this->db->query($queryFile);
+        $this->db->bind('id_arsip', $idArsip);
+        $this->db->bind('nama_asli', $copied['nama_asli']);
+        $this->db->bind('nama_unik', $copied['nama_unik']);
+        $this->db->bind('path', $copied['path']);
+        $this->db->bind('ukuran', $copied['ukuran']);
+        $this->db->bind('id_surat_masuk_file', $lampiran['id'] ?? null);
+        $this->db->execute();
+
+        return $this->db->rowCount();
     }
 
     public function tambahArsipDariSuratMasuk(array $surat, int $idKategori, array $lampiran = [])

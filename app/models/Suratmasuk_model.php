@@ -130,6 +130,7 @@ class Suratmasuk_model
             return;
         }
         $list = $this->reArrayFiles($files);
+        $inserted = [];
         foreach ($list as $file) {
             if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) continue;
             $info = $this->uploadFile($file);
@@ -144,6 +145,18 @@ class Suratmasuk_model
             $this->db->bind('filesize', $info['ukuran']);
             $this->db->bind('jenis', $info['jenis']);
             $this->db->execute();
+
+            $inserted[] = [
+                'id'             => $this->db->lastInsertId(),
+                'nama_file_asli' => $info['nama_asli'],
+                'nama_file_unik' => $info['nama_unik'],
+                'path_file'      => $info['path'],
+                'filesize'       => $info['ukuran'],
+            ];
+        }
+
+        if (!empty($inserted)) {
+            $this->sinkronLampiranKeArsip($idSurat, $inserted);
         }
     }
 
@@ -220,5 +233,24 @@ class Suratmasuk_model
             ];
         }
         return false;
+    }
+
+    private function sinkronLampiranKeArsip(int $idSurat, array $lampiranBaru)
+    {
+        if (empty($lampiranBaru)) {
+            return;
+        }
+        require_once APPROOT . '/app/models/Arsip_model.php';
+        $arsipModel = new Arsip_model();
+        $arsipList = $arsipModel->getArsipBySuratMasuk($idSurat);
+        if (empty($arsipList)) {
+            return;
+        }
+
+        foreach ($arsipList as $arsip) {
+            foreach ($lampiranBaru as $lampiran) {
+                $arsipModel->salinLampiranSuratMasukKeArsip((int)$arsip['id'], $lampiran);
+            }
+        }
     }
 }
