@@ -74,7 +74,7 @@ class Arsip_model {
                 $fileInfo = $this->uploadFile($file);
                 if ($fileInfo) {
                     $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
-                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+                                  . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
                     $this->db->query($queryFile);
                     $this->db->bind('id_arsip', $arsipId);
                     $this->db->bind('nama_asli', $fileInfo['nama_asli']);
@@ -160,7 +160,7 @@ class Arsip_model {
                 $fileInfo = $this->uploadFile($file);
                 if ($fileInfo) {
                     $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
-                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+                                  . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
                     $this->db->query($queryFile);
                     $this->db->bind('id_arsip', $data['id']);
                     $this->db->bind('nama_asli', $fileInfo['nama_asli']);
