@@ -56,6 +56,12 @@ class Dashboard_model {
         return (int)($row['total'] ?? 0);
     }
 
+    public function getTotalSuratMasuk() {
+        $this->db->query("SELECT COUNT(*) AS total FROM surat_masuk");
+        $row = $this->db->single();
+        return (int)($row['total'] ?? 0);
+    }
+
     /* --- SURAT PER BULAN sejak $start (YYYY-mm-01) --- */
     public function getSuratPerBulan($startYmd) {
         $this->db->query("
@@ -79,6 +85,11 @@ class Dashboard_model {
             GROUP BY sk.id_template
             ORDER BY jml DESC
         ");
+        return $this->db->resultSet();
+    }
+
+    public function getSuratMasukByStatus() {
+        $this->db->query("SELECT status, COUNT(*) AS jml FROM surat_masuk GROUP BY status");
         return $this->db->resultSet();
     }
 }

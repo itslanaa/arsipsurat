@@ -22,6 +22,24 @@ class Kategori_model {
         return $this->db->single();
     }
 
+    public function getKategoriByNama($nama)
+    {
+        $this->db->query('SELECT * FROM ' . $this->table . ' WHERE nama_kategori = :nama LIMIT 1');
+        $this->db->bind('nama', $nama);
+        return $this->db->single();
+    }
+
+    public function getOrCreateByNama($nama)
+    {
+        $existing = $this->getKategoriByNama($nama);
+        if ($existing && isset($existing['id'])) {
+            return (int)$existing['id'];
+        }
+        $this->tambahDataKategori(['nama_kategori' => $nama]);
+        $created = $this->getKategoriByNama($nama);
+        return (int)($created['id'] ?? 0);
+    }
+
     public function tambahDataKategori($data)
     {
         $query = "INSERT INTO " . $this->table . " (nama_kategori) VALUES (:nama_kategori)";

@@ -10,6 +10,49 @@
 
     <form id="suratForm" action="<?= BASE_URL; ?>/surat/generate" method="post" target="_blank">
       <div class="mb-4">
+        <label for="id_surat_masuk" class="block text-sm font-medium text-gray-700 mb-1">Gunakan data dari Surat Masuk</label>
+        <select id="id_surat_masuk" name="id_surat_masuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <option value="">-- Tidak ada referensi --</option>
+          <?php foreach (($surat_masuk_ref ?? []) as $sm): ?>
+            <option value="<?= (int)$sm['id']; ?>" data-kode="<?= htmlspecialchars($sm['kode_klasifikasi']); ?>" data-unit="<?= htmlspecialchars($sm['unit_pengolah'] ?? ''); ?>">
+              <?= htmlspecialchars($sm['nomor_agenda']); ?> — <?= htmlspecialchars($sm['perihal']); ?> (<?= htmlspecialchars($sm['kode_klasifikasi']); ?>)
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">Jika dipilih, kode klasifikasi dan unit akan mengikuti data surat masuk.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="kodeKlasifikasi" class="block text-sm font-medium text-gray-700 mb-1">Kode Klasifikasi</label>
+          <input type="text" id="kodeKlasifikasi" name="kodeKlasifikasi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Contoh: 800.1">
+          <p class="text-xs text-gray-500 mt-1">Mengikuti kode klasifikasi pemerintah.</p>
+        </div>
+        <div>
+          <label for="kodeRegistrasi" class="block text-sm font-medium text-gray-700 mb-1">Kode Registrasi Surat Keluar</label>
+          <input type="text" id="kodeRegistrasi" name="kodeRegistrasi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Urut register, mis. 01">
+          <p class="text-xs text-gray-500 mt-1">Angka/nomor urut yang akan digabungkan dengan kode klasifikasi.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-end">
+        <div>
+          <label for="unitPengolahSelect" class="block text-sm font-medium text-gray-700 mb-1">Unit Pengolah</label>
+          <select id="unitPengolahSelect" name="unitPengolahSelect" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            <?php foreach (($unit_pengolah_options ?? []) as $u): ?>
+              <option value="<?= htmlspecialchars($u); ?>"><?= htmlspecialchars($u); ?></option>
+            <?php endforeach; ?>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Sama dengan disposisi Sekcam/Umpeg.</p>
+        </div>
+        <div>
+          <label for="noSurat" class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat (otomatis)</label>
+          <input type="text" id="noSurat" name="noSurat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50" placeholder="800.1/01 -Umpeg" readonly>
+          <p class="text-xs text-gray-500 mt-1">Format: kode klasifikasi/kode registrasi -Unit Pengolah.</p>
+        </div>
+      </div>
+
+      <div class="mb-4">
         <label for="template_id" class="block text-sm font-medium text-gray-700 mb-1">Pilih Template Surat</label>
         <select id="template_id" name="template_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
           <option value="tugas">Surat Tugas</option>
@@ -122,6 +165,48 @@
 <?php Flasher::flash(); ?>
 <script>
   const form = document.getElementById('suratForm');
+  const kodeKlasifikasiInput = document.getElementById('kodeKlasifikasi');
+  const kodeRegistrasiInput = document.getElementById('kodeRegistrasi');
+  const unitPengolahSelect = document.getElementById('unitPengolahSelect');
+  const nomorSuratInput = document.getElementById('noSurat');
+  const suratMasukSelect = document.getElementById('id_surat_masuk');
+  const btnExportDoc = document.getElementById('btnExportDOC');
+
+  function composeNomorSurat() {
+    const kode = (kodeKlasifikasiInput?.value || '').trim();
+    const reg = (kodeRegistrasiInput?.value || '').trim();
+    const unit = (unitPengolahSelect?.value || '').trim();
+
+    let nomor = '';
+    if (kode || reg || unit) {
+      nomor = (kode ? `${kode}/` : '') + (reg || '');
+      if (unit) nomor += ` -${unit}`;
+    }
+    if (nomorSuratInput) {
+      nomorSuratInput.value = nomor;
+    }
+    setText('preview-noSurat', nomor);
+  }
+
+  [kodeKlasifikasiInput, kodeRegistrasiInput, unitPengolahSelect].forEach(el => {
+    if (!el) return;
+    el.addEventListener('input', composeNomorSurat);
+  });
+
+  if (suratMasukSelect) {
+    suratMasukSelect.addEventListener('change', () => {
+      const opt = suratMasukSelect.selectedOptions[0];
+      const kode = opt ? (opt.getAttribute('data-kode') || '') : '';
+      const unit = opt ? (opt.getAttribute('data-unit') || '') : '';
+      if (kode && kodeKlasifikasiInput) kodeKlasifikasiInput.value = kode;
+      if (unit && unitPengolahSelect) {
+        const match = Array.from(unitPengolahSelect.options).find(o => o.value === unit);
+        if (match) unitPengolahSelect.value = unit;
+      }
+      composeNomorSurat();
+    });
+  }
+
   document.getElementById('btnExportPDF').addEventListener('click', () => {
     let s = document.createElement('input');
     s.type = 'hidden';
@@ -130,14 +215,17 @@
     form.appendChild(s);
     form.submit();
   });
-  document.getElementById('btnExportDOC').addEventListener('click', () => {
-    let s = document.createElement('input');
-    s.type = 'hidden';
-    s.name = 'export_scope';
-    s.value = 'doc';
-    form.appendChild(s);
-    form.submit();
-  });
+  if (btnExportDoc) {
+    btnExportDoc.addEventListener('click', () => {
+      let s = document.createElement('input');
+      s.type = 'hidden';
+      s.name = 'export_scope';
+      s.value = 'doc';
+      form.appendChild(s);
+      form.submit();
+    });
+  }
+
 </script>
 
 <script>
@@ -287,4 +375,5 @@
   /* inisialisasi default: template 'tugas' */
   attachLivePreview('tugas');
   updatePreviewFromForm('tugas');
+  composeNomorSurat();
 </script>
