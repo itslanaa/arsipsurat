@@ -66,4 +66,44 @@ class Suratmasuk extends Controller
         header('Location: ' . BASE_URL . '/suratmasuk');
         exit;
     }
+
+    public function arsipkan($id)
+    {
+        $model = $this->model('Suratmasuk_model');
+        $surat = $model->getById((int)$id);
+        if (!$surat) {
+            Flasher::setFlash('Arsip', 'Surat masuk tidak ditemukan.', 'error');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
+        if ($surat['status'] !== 'selesai') {
+            Flasher::setFlash('Arsip', 'Lengkapi disposisi hingga status selesai sebelum diarsipkan.', 'info');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
+
+        $kategoriNama = $this->kategoriArsipDariKode($surat['kode_klasifikasi'] ?? '');
+        $kategoriModel = $this->model('Kategori_model');
+        $idKategori = $kategoriModel->getOrCreateByNama($kategoriNama);
+        $lampiran = $model->getFilesBySurat((int)$id);
+
+        $arsipId = $this->model('Arsip_model')->tambahArsipDariSuratMasuk($surat, $idKategori, $lampiran);
+        if ($arsipId) {
+            Flasher::setFlash('Arsip', 'Surat masuk dan lampirannya berhasil dipindahkan ke arsip.', 'success');
+        } else {
+            Flasher::setFlash('Arsip', 'Gagal mengarsipkan surat masuk.', 'error');
+        }
+        header('Location: ' . BASE_URL . '/arsip');
+        exit;
+    }
+
+    private function kategoriArsipDariKode(string $kode)
+    {
+        $map = [
+            '800.1' => '800.1 - Sumber Daya Manusia',
+            '800.2' => '800.2 - Pendidikan dan Pelatihan',
+            '400.14' => '400.14 - Hubungan Masyarakat',
+        ];
+        return $map[$kode] ?? 'Surat Masuk';
+    }
 }

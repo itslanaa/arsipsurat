@@ -28,6 +28,18 @@ class Suratmasuk_model
         return $rows;
     }
 
+    public function getReferensiKeluar($limit = 100)
+    {
+        $sql = "SELECT id, nomor_agenda, perihal, kode_klasifikasi, unit_pengolah, status
+                FROM {$this->table}
+                WHERE kode_klasifikasi <> ''
+                ORDER BY created_at DESC
+                LIMIT :batas";
+        $this->db->query($sql);
+        $this->db->bind('batas', (int)$limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
+
     public function getById($id)
     {
         $this->db->query("SELECT * FROM {$this->table} WHERE id = :id");
@@ -37,6 +49,11 @@ class Suratmasuk_model
             $row['files'] = $this->getFiles((int)$id);
         }
         return $row;
+    }
+
+    public function getFilesBySurat(int $id)
+    {
+        return $this->getFiles($id);
     }
 
     public function create(array $data, array $files)

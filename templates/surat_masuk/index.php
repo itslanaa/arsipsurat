@@ -83,6 +83,11 @@ $statusClasses = [
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold <?= $statusClasses[$s] ?? 'bg-gray-100 text-gray-700'; ?>">
                                 <?= $statusLabels[$s] ?? $s; ?>
                             </span>
+                            <?php if ($s === 'selesai'): ?>
+                                <div class="mt-2">
+                                    <a href="<?= BASE_URL; ?>/suratmasuk/arsipkan/<?= (int)$item['id']; ?>" class="text-xs text-emerald-700 font-semibold hover:underline">Arsipkan</a>
+                                </div>
+                            <?php endif; ?>
                         </td>
                         <td class="py-2 pr-4">
                             <div class="text-xs text-gray-600 mb-2">

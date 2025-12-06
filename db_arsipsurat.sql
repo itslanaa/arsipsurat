@@ -33,20 +33,22 @@ CREATE TABLE `arsip` (
   `id_kategori` int NOT NULL,
   `tgl_upload` date NOT NULL,
   `author` varchar(150) DEFAULT NULL,
-  `id_user_uploader` int NOT NULL
+  `id_user_uploader` int NOT NULL,
+  `id_surat_masuk` int DEFAULT NULL,
+  `kode_klasifikasi` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `arsip`
 --
 
-INSERT INTO `arsip` (`id`, `judul`, `id_kategori`, `tgl_upload`, `author`, `id_user_uploader`) VALUES
-(2, 'Surat Undangan Rapat Koordinasi', 1, '2025-04-12', NULL, 1),
-(4, 'SK Camat ', 4, '2025-08-05', NULL, 1),
-(5, 'Arsip Kepegawaian 2025', 3, '2025-08-06', NULL, 1),
-(7, 'Sosialisasi', 3, '2025-08-06', NULL, 1),
-(8, 'Penkes', 1, '2025-08-06', NULL, 1),
-(9, 'Umum dan Kepegawaian', 2, '2025-08-06', NULL, 1);
+INSERT INTO `arsip` (`id`, `judul`, `id_kategori`, `tgl_upload`, `author`, `id_user_uploader`, `id_surat_masuk`, `kode_klasifikasi`) VALUES
+(2, 'Surat Undangan Rapat Koordinasi', 1, '2025-04-12', NULL, 1, NULL, NULL),
+(4, 'SK Camat ', 1, '2025-08-05', NULL, 1, NULL, NULL),
+(5, 'Arsip Kepegawaian 2025', 1, '2025-08-06', NULL, 1, NULL, NULL),
+(7, 'Sosialisasi', 3, '2025-08-06', NULL, 1, NULL, NULL),
+(8, 'Penkes', 2, '2025-08-06', NULL, 1, NULL, NULL),
+(9, 'Umum dan Kepegawaian', 1, '2025-08-06', NULL, 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -89,10 +91,9 @@ CREATE TABLE `kategori_arsip` (
 --
 
 INSERT INTO `kategori_arsip` (`id`, `nama_kategori`) VALUES
-(1, 'Surat Masuk'),
-(2, 'Laporan Keuangan'),
-(3, 'Dokumen Kepegawaian'),
-(4, 'Aset Daerah');
+(1, '800.1 - Sumber Daya Manusia'),
+(2, '800.2 - Pendidikan dan Pelatihan'),
+(3, '400.14 - Hubungan Masyarakat');
 
 -- --------------------------------------------------------
 
@@ -254,6 +255,8 @@ CREATE TABLE `surat_keluar` (
   `id_user_pembuat` int NOT NULL,
   `nama_file_pdf` varchar(255) NOT NULL,
   `path_file` varchar(255) NOT NULL,
+  `kode_klasifikasi` varchar(50) DEFAULT NULL,
+  `id_surat_masuk` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -310,7 +313,9 @@ INSERT INTO `users` (`id`, `nama_lengkap`, `username`, `password`, `role`) VALUE
 ALTER TABLE `arsip`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_kategori` (`id_kategori`),
-  ADD KEY `id_user_uploader` (`id_user_uploader`);
+  ADD KEY `id_user_uploader` (`id_user_uploader`),
+  ADD KEY `idx_arsip_surat_masuk` (`id_surat_masuk`),
+  ADD KEY `idx_arsip_kode` (`kode_klasifikasi`);
 
 --
 -- Indexes for table `arsip_files`
@@ -344,7 +349,9 @@ ALTER TABLE `pejabat`
 ALTER TABLE `surat_keluar`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_tanggal` (`tanggal_surat`),
-  ADD KEY `idx_template` (`id_template`);
+  ADD KEY `idx_template` (`id_template`),
+  ADD KEY `idx_keluar_kode` (`kode_klasifikasi`),
+  ADD KEY `idx_keluar_surat_masuk` (`id_surat_masuk`);
 
 --
 -- Indexes for table `template_surat`
@@ -449,7 +456,8 @@ ALTER TABLE `surat_masuk_files`
 --
 ALTER TABLE `arsip`
   ADD CONSTRAINT `arsip_ibfk_1` FOREIGN KEY (`id_kategori`) REFERENCES `kategori_arsip` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT `arsip_ibfk_2` FOREIGN KEY (`id_user_uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `arsip_ibfk_2` FOREIGN KEY (`id_user_uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `arsip_ibfk_3` FOREIGN KEY (`id_surat_masuk`) REFERENCES `surat_masuk` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `arsip_files`
@@ -468,6 +476,13 @@ ALTER TABLE `login_history`
 --
 ALTER TABLE `surat_masuk`
   ADD CONSTRAINT `surat_masuk_ibfk_1` FOREIGN KEY (`id_user_pencatat`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `surat_keluar`
+--
+ALTER TABLE `surat_keluar`
+  ADD CONSTRAINT `surat_keluar_ibfk_1` FOREIGN KEY (`id_template`) REFERENCES `template_surat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `surat_keluar_ibfk_2` FOREIGN KEY (`id_surat_masuk`) REFERENCES `surat_masuk` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `surat_masuk_files`
