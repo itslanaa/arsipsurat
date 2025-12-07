@@ -24,6 +24,7 @@ class Dashboard extends Controller
         $data['total_kategori'] = $dashboardModel->getTotalKategori();
         $data['total_pengguna'] = $dashboardModel->getTotalPengguna();
         $data['total_surat']   = $dashboardModel->getTotalSurat();      // <-- baru
+        $data['total_surat_masuk'] = $dashboardModel->getTotalSuratMasuk();
 
         // Mengambil dan memformat data untuk chart
         $chartData = $dashboardModel->getArsipDistribution();
@@ -59,6 +60,9 @@ class Dashboard extends Controller
         $byTpl = $dashboardModel->getSuratByTemplate();
         $data['tpl_labels'] = array_map(fn($r) => $r['nama_template'], $byTpl);
         $data['tpl_data']   = array_map(fn($r) => (int)$r['jml'], $byTpl);
+
+        // ----- Status surat masuk -----
+        $data['surat_masuk_status'] = $dashboardModel->getSuratMasukByStatus();
 
         // Memanggil view dan mengirimkan semua data
         $this->view('layouts/header', $data);

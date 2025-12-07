@@ -3,12 +3,87 @@
 // File: templates/surat/create.php (Final Partial Structure)
 // ================================
 ?>
+<style>
+  .preview-scroll {
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+  }
+  .preview-frame {
+    background: #fff;
+    max-width: 900px;
+    width: min(900px, 100%);
+    min-height: 1120px;
+    margin: 0 auto;
+    padding: 32px 36px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+  .preview-zoomable {
+    transform-origin: top center;
+    transition: transform 150ms ease;
+  }
+  .preview-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .field-hidden {
+    opacity: 0.6;
+  }
+  .field-hidden input,
+  .field-hidden label {
+    text-decoration: line-through;
+  }
+</style>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
   <!-- Kolom Formulir Input -->
   <div class="bg-white p-6 rounded-lg shadow-md">
     <h3 class="text-xl font-semibold mb-6 border-b pb-4">Formulir Isian Surat</h3>
 
     <form id="suratForm" action="<?= BASE_URL; ?>/surat/generate" method="post" target="_blank">
+      <div class="mb-4">
+        <label for="id_surat_masuk" class="block text-sm font-medium text-gray-700 mb-1">Gunakan data dari Surat Masuk</label>
+        <select id="id_surat_masuk" name="id_surat_masuk" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          <option value="">-- Tidak ada referensi --</option>
+          <?php foreach (($surat_masuk_ref ?? []) as $sm): ?>
+            <option value="<?= (int)$sm['id']; ?>" data-kode="<?= htmlspecialchars($sm['kode_klasifikasi']); ?>" data-unit="<?= htmlspecialchars($sm['unit_pengolah'] ?? ''); ?>">
+              <?= htmlspecialchars($sm['nomor_agenda']); ?> — <?= htmlspecialchars($sm['perihal']); ?> (<?= htmlspecialchars($sm['kode_klasifikasi']); ?>)
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">Jika dipilih, kode klasifikasi dan unit akan mengikuti data surat masuk.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="kodeKlasifikasi" class="block text-sm font-medium text-gray-700 mb-1">Kode Klasifikasi</label>
+          <input type="text" id="kodeKlasifikasi" name="kodeKlasifikasi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Contoh: 800.1">
+          <p class="text-xs text-gray-500 mt-1">Mengikuti kode klasifikasi pemerintah.</p>
+        </div>
+        <div>
+          <label for="kodeRegistrasi" class="block text-sm font-medium text-gray-700 mb-1">Kode Registrasi Surat Keluar</label>
+          <input type="text" id="kodeRegistrasi" name="kodeRegistrasi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Urut register, mis. 01">
+          <p class="text-xs text-gray-500 mt-1">Angka/nomor urut yang akan digabungkan dengan kode klasifikasi.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 items-end">
+        <div>
+          <label for="unitPengolahSelect" class="block text-sm font-medium text-gray-700 mb-1">Unit Pengolah</label>
+          <select id="unitPengolahSelect" name="unitPengolahSelect" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            <?php foreach (($unit_pengolah_options ?? []) as $u): ?>
+              <option value="<?= htmlspecialchars($u); ?>"><?= htmlspecialchars($u); ?></option>
+            <?php endforeach; ?>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Sama dengan disposisi Sekcam/Umpeg.</p>
+        </div>
+        <div>
+          <label for="noSurat" class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat (otomatis)</label>
+          <input type="text" id="noSurat" name="noSurat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50" placeholder="800.1/01 -Umpeg" readonly>
+          <p class="text-xs text-gray-500 mt-1">Format: kode klasifikasi/kode registrasi -Unit Pengolah.</p>
+        </div>
+      </div>
+
       <div class="mb-4">
         <label for="template_id" class="block text-sm font-medium text-gray-700 mb-1">Pilih Template Surat</label>
         <select id="template_id" name="template_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
@@ -27,9 +102,18 @@
   </div>
 
   <!-- Kolom Live Preview -->
-  <div class="bg-gray-200 p-4 rounded-lg overflow-auto">
+  <div class="bg-gray-200 p-4 rounded-lg preview-scroll">
+    <div class="flex items-center justify-between mb-3 preview-toolbar">
+      <p class="font-semibold text-gray-700">Live Preview</p>
+      <div class="flex items-center gap-2 text-sm text-gray-700">
+        <label for="previewZoom" class="whitespace-nowrap">Zoom</label>
+        <input type="range" id="previewZoom" min="80" max="120" step="5" value="100"
+          class="w-32 accent-blue-600">
+        <span id="previewZoomValue">100%</span>
+      </div>
+    </div>
     <div class="preview-container" id="preview-wrapper">
-      <div id="preview-container">
+      <div id="preview-container" class="preview-frame preview-zoomable">
         <?php include __DIR__ . '/partials/preview_surat_tugas.php'; ?>
       </div>
     </div>
@@ -122,6 +206,51 @@
 <?php Flasher::flash(); ?>
 <script>
   const form = document.getElementById('suratForm');
+  const kodeKlasifikasiInput = document.getElementById('kodeKlasifikasi');
+  const kodeRegistrasiInput = document.getElementById('kodeRegistrasi');
+  const unitPengolahSelect = document.getElementById('unitPengolahSelect');
+  const nomorSuratInput = document.getElementById('noSurat');
+  const suratMasukSelect = document.getElementById('id_surat_masuk');
+  const btnExportDoc = document.getElementById('btnExportDOC');
+  const previewZoom = document.getElementById('previewZoom');
+  const previewZoomValue = document.getElementById('previewZoomValue');
+  const previewZoomTarget = document.getElementById('preview-container');
+
+  function composeNomorSurat() {
+    const kode = (kodeKlasifikasiInput?.value || '').trim();
+    const reg = (kodeRegistrasiInput?.value || '').trim();
+    const unit = (unitPengolahSelect?.value || '').trim();
+
+    let nomor = '';
+    if (kode || reg || unit) {
+      nomor = (kode ? `${kode}/` : '') + (reg || '');
+      if (unit) nomor += ` -${unit}`;
+    }
+    if (nomorSuratInput) {
+      nomorSuratInput.value = nomor;
+    }
+    setText('preview-noSurat', nomor);
+  }
+
+  [kodeKlasifikasiInput, kodeRegistrasiInput, unitPengolahSelect].forEach(el => {
+    if (!el) return;
+    el.addEventListener('input', composeNomorSurat);
+  });
+
+  if (suratMasukSelect) {
+    suratMasukSelect.addEventListener('change', () => {
+      const opt = suratMasukSelect.selectedOptions[0];
+      const kode = opt ? (opt.getAttribute('data-kode') || '') : '';
+      const unit = opt ? (opt.getAttribute('data-unit') || '') : '';
+      if (kode && kodeKlasifikasiInput) kodeKlasifikasiInput.value = kode;
+      if (unit && unitPengolahSelect) {
+        const match = Array.from(unitPengolahSelect.options).find(o => o.value === unit);
+        if (match) unitPengolahSelect.value = unit;
+      }
+      composeNomorSurat();
+    });
+  }
+
   document.getElementById('btnExportPDF').addEventListener('click', () => {
     let s = document.createElement('input');
     s.type = 'hidden';
@@ -130,14 +259,29 @@
     form.appendChild(s);
     form.submit();
   });
-  document.getElementById('btnExportDOC').addEventListener('click', () => {
-    let s = document.createElement('input');
-    s.type = 'hidden';
-    s.name = 'export_scope';
-    s.value = 'doc';
-    form.appendChild(s);
-    form.submit();
-  });
+  if (btnExportDoc) {
+    btnExportDoc.addEventListener('click', () => {
+      let s = document.createElement('input');
+      s.type = 'hidden';
+      s.name = 'export_scope';
+      s.value = 'doc';
+      form.appendChild(s);
+      form.submit();
+    });
+  }
+
+  function setPreviewZoom(val) {
+    const scale = parseInt(val || '100', 10) / 100;
+    if (previewZoomTarget) {
+      previewZoomTarget.style.transform = `scale(${scale})`;
+    }
+    if (previewZoomValue) previewZoomValue.textContent = `${val}%`;
+  }
+  if (previewZoom) {
+    setPreviewZoom(previewZoom.value);
+    previewZoom.addEventListener('input', (e) => setPreviewZoom(e.target.value));
+  }
+
 </script>
 
 <script>
@@ -146,18 +290,20 @@
   const previewContainer = document.getElementById('preview-container');
 
   /* --- util --- */
-  function nl2br(str) {
-    if (!str) return '';
-    return String(str).replace(/\n/g, '<br>');
-  }
-
   function setText(spanId, value, {
-    html = false
+    html = false,
+    preserve = false
   } = {}) {
     const el = document.getElementById(spanId);
     if (!el) return;
-    if (html) el.innerHTML = value ?? '';
-    else el.textContent = value ?? '';
+    if (preserve) {
+      el.textContent = value ?? '';
+      el.style.whiteSpace = 'pre-wrap';
+    } else if (html) {
+      el.innerHTML = value ?? '';
+    } else {
+      el.textContent = value ?? '';
+    }
   }
 
   /* daftar field utk kedua template */
@@ -171,16 +317,10 @@
   ];
   const BIND_MAP_TUGAS = [
     ['dasarSurat', 'preview-dasar', {
-      html: true,
-      nl2br: true
+      preserve: true
     }],
-    ['pegawaiNama', 'preview-pegawaiNama', {}],
-    ['pegawaiPangkat', 'preview-pegawaiPangkat', {}],
-    ['pegawaiNip', 'preview-pegawaiNip', {}],
-    ['pegawaiJabatan', 'preview-pegawaiJabatan', {}],
     ['tugasSurat', 'preview-tugas', {
-      html: true,
-      nl2br: true
+      preserve: true
     }],
   ];
   const BIND_MAP_KET = [
@@ -215,13 +355,10 @@
             day: 'numeric'
           }) : '';
           setText(spanId, formatted);
-        } else if (opt.html && opt.nl2br) {
-          setText(spanId, nl2br(input.value), {
-            html: true
-          });
         } else {
           setText(spanId, input.value, {
-            html: !!opt.html
+            html: !!opt.html,
+            preserve: !!opt.preserve
           });
         }
       };
@@ -247,16 +384,17 @@
           day: 'numeric'
         }) : '';
         setText(spanId, formatted);
-      } else if (opt.html && opt.nl2br) {
-        setText(spanId, nl2br(input.value), {
-          html: true
-        });
       } else {
         setText(spanId, input.value, {
-          html: !!opt.html
+          html: !!opt.html,
+          preserve: !!opt.preserve
         });
       }
     });
+
+    if (template === 'tugas') {
+      renderPegawaiPreview();
+    }
   }
 
   /* switch partial form + preview via AJAX */
@@ -270,6 +408,7 @@
         formContainer.innerHTML = html;
         // setelah form masuk DOM, pasang listener baru utk template ini
         attachLivePreview(template);
+        initPegawaiRepeater();
         // lalu sinkronkan nilai awal ke preview
         updatePreviewFromForm(template);
       });
@@ -278,13 +417,165 @@
     fetch(`<?= BASE_URL ?>/surat/get_partial?part=preview&template=${template}`)
       .then(res => res.text())
       .then(html => {
-        previewContainer.innerHTML = html;
+        previewContainer.innerHTML = `<div class="preview-frame preview-zoomable">${html}</div>`;
         // setelah preview ganti, refresh isian dari form ke preview
         updatePreviewFromForm(template);
       });
   });
 
   /* inisialisasi default: template 'tugas' */
+  const PEGAWAI_FIELDS = ['nama', 'pangkat', 'nip', 'jabatan'];
+
+  function isFieldVisible(row, field) {
+    const flag = row.querySelector(`[name="pegawai[visible_${field}][]"]`);
+    return !flag || flag.value !== '0';
+  }
+
+  function setFieldVisibility(row, field, visible) {
+    const flag = row.querySelector(`[name="pegawai[visible_${field}][]"]`);
+    if (flag) flag.value = visible ? '1' : '0';
+    const toggle = row.querySelector(`[data-toggle-target="${field}"]`);
+    if (toggle) {
+      toggle.textContent = visible ? 'Sembunyikan' : 'Tampilkan';
+      toggle.classList.toggle('text-gray-400', !visible);
+    }
+    const wrapper = flag ? flag.closest('.mb-4') : null;
+    if (wrapper) wrapper.classList.toggle('field-hidden', !visible);
+  }
+
+  function bindVisibilityToggles(row) {
+    PEGAWAI_FIELDS.forEach(field => {
+      const btn = row.querySelector(`[data-toggle-target="${field}"]`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const next = !isFieldVisible(row, field);
+          setFieldVisibility(row, field, next);
+          renderPegawaiPreview();
+        });
+        setFieldVisibility(row, field, isFieldVisible(row, field));
+      }
+    });
+  }
+
+  function collectPegawai() {
+    const rows = document.querySelectorAll('.pegawai-item');
+    const data = [];
+    rows.forEach(row => {
+      const nama = row.querySelector('[data-field="nama"]')?.value?.trim() ?? '';
+      const pangkat = row.querySelector('[data-field="pangkat"]')?.value?.trim() ?? '';
+      const nip = row.querySelector('[data-field="nip"]')?.value?.trim() ?? '';
+      const jabatan = row.querySelector('[data-field="jabatan"]')?.value?.trim() ?? '';
+      if (nama || pangkat || nip || jabatan) {
+        data.push({
+          nama,
+          pangkat,
+          nip,
+          jabatan,
+          visible_nama: isFieldVisible(row, 'nama'),
+          visible_pangkat: isFieldVisible(row, 'pangkat'),
+          visible_nip: isFieldVisible(row, 'nip'),
+          visible_jabatan: isFieldVisible(row, 'jabatan'),
+        });
+      }
+    });
+    return data.length ? data : [{
+      nama: '', pangkat: '', nip: '', jabatan: '',
+      visible_nama: true, visible_pangkat: true, visible_nip: true, visible_jabatan: true,
+    }];
+  }
+
+  function renderPegawaiPreview() {
+    const data = collectPegawai();
+    const singleWrap = document.getElementById('preview-pegawai-single');
+    const multiWrap = document.getElementById('preview-pegawai-multi');
+    const listEl = document.getElementById('preview-pegawai-list');
+    if (!singleWrap || !multiWrap || !listEl) return;
+
+    const rows = document.querySelectorAll('.pegawai-item');
+    rows.forEach(row => {
+      const btn = row.querySelector('.btn-remove-pegawai');
+      if (!btn) return;
+      if (rows.length > 1) btn.classList.remove('hidden');
+      else btn.classList.add('hidden');
+    });
+
+    if (data.length === 1) {
+      singleWrap.classList.remove('hidden');
+      multiWrap.classList.add('hidden');
+      const pg = data[0];
+      const toggleRow = (id, show) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !show);
+      };
+      toggleRow('preview-row-nama', pg.visible_nama !== false);
+      toggleRow('preview-row-pangkat', pg.visible_pangkat !== false);
+      toggleRow('preview-row-nip', pg.visible_nip !== false);
+      toggleRow('preview-row-jabatan', pg.visible_jabatan !== false);
+      setText('preview-pegawaiNama', pg.visible_nama !== false ? pg.nama : '');
+      setText('preview-pegawaiPangkat', pg.visible_pangkat !== false ? pg.pangkat : '');
+      setText('preview-pegawaiNip', pg.visible_nip !== false ? pg.nip : '');
+      setText('preview-pegawaiJabatan', pg.visible_jabatan !== false ? pg.jabatan : '');
+    } else {
+      singleWrap.classList.add('hidden');
+      multiWrap.classList.remove('hidden');
+      listEl.innerHTML = '';
+      data.forEach((row) => {
+        const li = document.createElement('li');
+        li.className = 'mb-3';
+        const lines = [];
+        if (row.visible_nama !== false) {
+          lines.push(`<div><strong>${row.nama || '-'}</strong></div>`);
+        }
+        const sub = [];
+        if (row.visible_pangkat !== false) sub.push(`<div>Pangkat/Gol : ${row.pangkat || '-'}</div>`);
+        if (row.visible_nip !== false) sub.push(`<div>NIP : ${row.nip || '-'}</div>`);
+        if (row.visible_jabatan !== false) sub.push(`<div>Jabatan : ${row.jabatan || '-'}</div>`);
+        if (sub.length) lines.push(`<div style="padding-left:18px;">${sub.join('')}</div>`);
+        if (!lines.length) lines.push('<div>-</div>');
+        li.innerHTML = lines.join('');
+        listEl.appendChild(li);
+      });
+    }
+  }
+
+  function initPegawaiRepeater() {
+    const container = document.getElementById('pegawaiRepeater');
+    if (!container) return;
+
+    const addBtn = document.getElementById('btnAddPegawai');
+    const template = document.getElementById('pegawai-template');
+
+    const bindInput = (row) => {
+      row.querySelectorAll('input').forEach(inp => {
+        ['input', 'change'].forEach(evt => inp.addEventListener(evt, () => {
+          renderPegawaiPreview();
+        }));
+      });
+      bindVisibilityToggles(row);
+      const rm = row.querySelector('.btn-remove-pegawai');
+      if (rm) {
+        rm.addEventListener('click', () => {
+          row.remove();
+          renderPegawaiPreview();
+        });
+      }
+    };
+
+    container.querySelectorAll('.pegawai-item').forEach(bindInput);
+
+    if (addBtn && template) {
+      addBtn.addEventListener('click', () => {
+        const clone = template.content.firstElementChild.cloneNode(true);
+        container.appendChild(clone);
+        bindInput(clone);
+        renderPegawaiPreview();
+      });
+    }
+    renderPegawaiPreview();
+  }
+
   attachLivePreview('tugas');
   updatePreviewFromForm('tugas');
+  initPegawaiRepeater();
+  composeNomorSurat();
 </script>
