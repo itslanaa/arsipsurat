@@ -13,13 +13,18 @@ class Suratmasuk_model
 
     public function getAll($limit = 100)
     {
+        $filter = $this->unitFilterClause('sm');
         $sql = "SELECT sm.*, COUNT(f.id) AS jumlah_file
                 FROM {$this->table} sm
                 LEFT JOIN {$this->filesTable} f ON f.id_surat_masuk = sm.id
+                {$filter['clause']}
                 GROUP BY sm.id
                 ORDER BY sm.tanggal_terima DESC, sm.id DESC
                 LIMIT :batas";
         $this->db->query($sql);
+        foreach ($filter['params'] as $key => $val) {
+            $this->db->bind($key, $val);
+        }
         $this->db->bind('batas', (int)$limit, PDO::PARAM_INT);
         $rows = $this->db->resultSet();
         foreach ($rows as &$row) {
@@ -151,14 +156,22 @@ class Suratmasuk_model
 
     public function countTotal()
     {
-        $this->db->query("SELECT COUNT(*) AS total FROM {$this->table}");
+        $filter = $this->unitFilterClause();
+        $this->db->query("SELECT COUNT(*) AS total FROM {$this->table} {$filter['clause']}");
+        foreach ($filter['params'] as $key => $val) {
+            $this->db->bind($key, $val);
+        }
         $row = $this->db->single();
         return (int)($row['total'] ?? 0);
     }
 
     public function countByStatus()
     {
-        $this->db->query("SELECT status, COUNT(*) AS total FROM {$this->table} GROUP BY status");
+        $filter = $this->unitFilterClause();
+        $this->db->query("SELECT status, COUNT(*) AS total FROM {$this->table} {$filter['clause']} GROUP BY status");
+        foreach ($filter['params'] as $key => $val) {
+            $this->db->bind($key, $val);
+        }
         $rows = $this->db->resultSet();
         $map = [];
         foreach ($rows as $r) {
@@ -170,7 +183,7 @@ class Suratmasuk_model
     public function terimaOlehUnit(int $id)
     {
         $current = $this->getById($id);
-        if (!$current || $current['status'] !== 'diproses_unit') {
+        if (!$current || !$this->isSuratVisibleToCurrentUnit($current) || $current['status'] !== 'diproses_unit') {
             return 0;
         }
 
@@ -330,5 +343,57 @@ class Suratmasuk_model
                 $arsipModel->salinLampiranSuratMasukKeArsip((int)$arsip['id'], $lampiran);
             }
         }
+    }
+
+    public function isSuratVisibleToCurrentUnit(array $surat): bool
+    {
+        if (currentRole() !== 'unit') {
+            return true;
+        }
+        $allowed = $this->unitAccessForUser($_SESSION['username'] ?? '');
+        if (empty($allowed)) {
+            return false;
+        }
+        return in_array($surat['unit_pengolah'] ?? '', $allowed, true);
+    }
+
+    private function unitFilterClause(string $alias = ''): array
+    {
+        if (currentRole() !== 'unit') {
+            return ['clause' => '', 'params' => []];
+        }
+
+        $units = $this->unitAccessForUser($_SESSION['username'] ?? '');
+        if (empty($units)) {
+            return ['clause' => ' WHERE 1=0', 'params' => []];
+        }
+
+        $column = $alias ? $alias . '.unit_pengolah' : 'unit_pengolah';
+        $params = [];
+        $placeholders = [];
+        foreach ($units as $index => $unit) {
+            $param = 'unit' . $index;
+            $params[$param] = $unit;
+            $placeholders[] = ':' . $param;
+        }
+
+        return [
+            'clause' => ' WHERE ' . $column . ' IN (' . implode(',', $placeholders) . ')',
+            'params' => $params,
+        ];
+    }
+
+    private function unitAccessForUser(string $username): array
+    {
+        $map = [
+            'staf' => ['Umpeg'],
+            'kasipenkes' => ['Umpeg'],
+            'kasipem' => ['Pemerintahan'],
+            'kasipm' => ['Pembangunan'],
+            'kasitrantibum' => ['Trantib'],
+            'kasiekbang' => ['Ekonomi Pembangunan'],
+        ];
+
+        return $map[$username] ?? [];
     }
 }

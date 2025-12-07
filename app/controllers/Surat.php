@@ -33,7 +33,7 @@ class Surat extends Controller
 
         $data['surat_list'] = $this->model('Surat_model')->getSuratKeluar(50);
         $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
-        $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Sekretariat'];
+        $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
 
 
 

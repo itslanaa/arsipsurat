@@ -29,6 +29,7 @@ class Auth extends Controller {
             $_SESSION['login'] = true;
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
+            $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
 
             $userModel->logLoginAttempt($user['id'], 'success'); // Catat login sukses
