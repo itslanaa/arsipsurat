@@ -74,11 +74,7 @@
       <td style="width:40%; text-align:center; vertical-align:top;">
         <p>Cibungbulang, <span id="preview-tglSurat"></span></p>
         <p style="font-weight:bold;"><?= htmlspecialchars($pejabat['jabatan'] ?? 'Camat'); ?>,</p>
-        <div style="height:22mm;"></div>
-        <div style="height:22mm;"></div>
-        <div style="height:22mm;"></div>
-        <div style="height:22mm;"></div>
-        <div style="height:22mm;"></div>
+        <div style="height:28mm;"></div>
         <p style="font-weight:bold; text-decoration:underline; margin-bottom:0;"><?= htmlspecialchars($pejabat['nama_lengkap'] ?? 'Nama Pejabat'); ?></p>
         <p style="margin:0;"><?= htmlspecialchars($pejabat['pangkat_gol'] ?? 'Pangkat'); ?></p>
         <p style="margin:0;">NIP. <?= htmlspecialchars($pejabat['nip'] ?? 'NIP Pejabat'); ?></p>
