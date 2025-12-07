@@ -30,9 +30,13 @@ class Auth extends Controller {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
             $_SESSION['role'] = $user['role'];
-            
+
             $userModel->logLoginAttempt($user['id'], 'success'); // Catat login sukses
-            header('Location: ' . BASE_URL . '/dashboard');
+            $redirect = '/dashboard';
+            if (in_array($user['role'], ['camat', 'sekcam', 'unit'], true)) {
+                $redirect = '/suratmasuk';
+            }
+            header('Location: ' . BASE_URL . $redirect);
             exit;
         } else {
             // Login gagal

@@ -33,20 +33,22 @@ CREATE TABLE `arsip` (
   `id_kategori` int NOT NULL,
   `tgl_upload` date NOT NULL,
   `author` varchar(150) DEFAULT NULL,
-  `id_user_uploader` int NOT NULL
+  `id_user_uploader` int NOT NULL,
+  `id_surat_masuk` int DEFAULT NULL,
+  `kode_klasifikasi` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `arsip`
 --
 
-INSERT INTO `arsip` (`id`, `judul`, `id_kategori`, `tgl_upload`, `author`, `id_user_uploader`) VALUES
-(2, 'Surat Undangan Rapat Koordinasi', 1, '2025-04-12', NULL, 1),
-(4, 'SK Camat ', 4, '2025-08-05', NULL, 1),
-(5, 'Arsip Kepegawaian 2025', 3, '2025-08-06', NULL, 1),
-(7, 'Sosialisasi', 3, '2025-08-06', NULL, 1),
-(8, 'Penkes', 1, '2025-08-06', NULL, 1),
-(9, 'Umum dan Kepegawaian', 2, '2025-08-06', NULL, 1);
+INSERT INTO `arsip` (`id`, `judul`, `id_kategori`, `tgl_upload`, `author`, `id_user_uploader`, `id_surat_masuk`, `kode_klasifikasi`) VALUES
+(2, 'Surat Undangan Rapat Koordinasi', 1, '2025-04-12', NULL, 1, NULL, NULL),
+(4, 'SK Camat ', 1, '2025-08-05', NULL, 1, NULL, NULL),
+(5, 'Arsip Kepegawaian 2025', 1, '2025-08-06', NULL, 1, NULL, NULL),
+(7, 'Sosialisasi', 3, '2025-08-06', NULL, 1, NULL, NULL),
+(8, 'Penkes', 2, '2025-08-06', NULL, 1, NULL, NULL),
+(9, 'Umum dan Kepegawaian', 1, '2025-08-06', NULL, 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -60,18 +62,19 @@ CREATE TABLE `arsip_files` (
   `nama_file_asli` varchar(255) NOT NULL,
   `nama_file_unik` varchar(255) NOT NULL,
   `path_file` varchar(255) NOT NULL,
-  `filesize` bigint DEFAULT NULL
+  `filesize` bigint DEFAULT NULL,
+  `id_surat_masuk_file` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `arsip_files`
 --
 
-INSERT INTO `arsip_files` (`id`, `id_arsip`, `nama_file_asli`, `nama_file_unik`, `path_file`, `filesize`) VALUES
-(7, 9, 'SK Camat Cibunbulang.docx', 'arsip-68930301167ec.docx', 'uploads/arsip/arsip-68930301167ec.docx', 45892),
-(8, 8, 'Evaluasi Kinerja Pegawai.docx', 'arsip-68942837784bb.docx', 'uploads/arsip/arsip-68942837784bb.docx', 12482),
-(9, 9, 'SK Camat Cibunbulang (1).docx', 'arsip-68a7d969c0502.docx', 'uploads/arsip/arsip-68a7d969c0502.docx', 45892),
-(10, 9, 'Daftar Hadir PL.pdf', 'arsip-68a7d98515281.pdf', 'uploads/arsip/arsip-68a7d98515281.pdf', 128580);
+INSERT INTO `arsip_files` (`id`, `id_arsip`, `nama_file_asli`, `nama_file_unik`, `path_file`, `filesize`, `id_surat_masuk_file`) VALUES
+(7, 9, 'SK Camat Cibunbulang.docx', 'arsip-68930301167ec.docx', 'uploads/arsip/arsip-68930301167ec.docx', 45892, NULL),
+(8, 8, 'Evaluasi Kinerja Pegawai.docx', 'arsip-68942837784bb.docx', 'uploads/arsip/arsip-68942837784bb.docx', 12482, NULL),
+(9, 9, 'SK Camat Cibunbulang (1).docx', 'arsip-68a7d969c0502.docx', 'uploads/arsip/arsip-68a7d969c0502.docx', 45892, NULL),
+(10, 9, 'Daftar Hadir PL.pdf', 'arsip-68a7d98515281.pdf', 'uploads/arsip/arsip-68a7d98515281.pdf', 128580, NULL);
 
 -- --------------------------------------------------------
 
@@ -81,6 +84,7 @@ INSERT INTO `arsip_files` (`id`, `id_arsip`, `nama_file_asli`, `nama_file_unik`,
 
 CREATE TABLE `kategori_arsip` (
   `id` int NOT NULL,
+  `kode` varchar(20) NOT NULL,
   `nama_kategori` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -88,11 +92,10 @@ CREATE TABLE `kategori_arsip` (
 -- Dumping data for table `kategori_arsip`
 --
 
-INSERT INTO `kategori_arsip` (`id`, `nama_kategori`) VALUES
-(1, 'Surat Masuk'),
-(2, 'Laporan Keuangan'),
-(3, 'Dokumen Kepegawaian'),
-(4, 'Aset Daerah');
+INSERT INTO `kategori_arsip` (`id`, `kode`, `nama_kategori`) VALUES
+(1, '800.1', 'Sumber Daya Manusia'),
+(2, '800.2', 'Pendidikan dan Pelatihan'),
+(3, '400.14', 'Hubungan Masyarakat');
 
 -- --------------------------------------------------------
 
@@ -164,6 +167,62 @@ INSERT INTO `login_history` (`id`, `id_user`, `login_time`, `ip_address`, `user_
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `surat_masuk`
+--
+
+CREATE TABLE `surat_masuk` (
+  `id` int NOT NULL,
+  `nomor_agenda` varchar(50) NOT NULL,
+  `tanggal_surat` date DEFAULT NULL,
+  `tanggal_terima` date NOT NULL,
+  `asal_surat` varchar(150) NOT NULL,
+  `perihal` varchar(255) NOT NULL,
+  `kode_klasifikasi` varchar(50) NOT NULL,
+  `ringkasan` text,
+  `instruksi_camat` text,
+  `catatan_koreksi` text,
+  `disposisi_sekcam` text,
+  `unit_pengolah` varchar(100) DEFAULT NULL,
+  `status` enum('diterima','instruksi_camat','koreksi','sekcam','distribusi_umpeg','diproses_unit','selesai') NOT NULL DEFAULT 'diterima',
+  `id_user_pencatat` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `surat_masuk`
+--
+
+INSERT INTO `surat_masuk` (`id`, `nomor_agenda`, `tanggal_surat`, `tanggal_terima`, `asal_surat`, `perihal`, `kode_klasifikasi`, `ringkasan`, `instruksi_camat`, `catatan_koreksi`, `disposisi_sekcam`, `unit_pengolah`, `status`, `id_user_pencatat`, `created_at`) VALUES
+(1, '01/REG/SM/2025', '2025-09-05', '2025-09-10', 'Sekretariat Daerah', 'Undangan Rakor Stunting', '800.1', 'Undangan rapat koordinasi penanganan stunting tingkat kabupaten.', 'Mohon hadir dan siapkan bahan paparan.', NULL, 'Sekcam: tugaskan ke Umpeg, hadirkan staf terkait.', 'Umpeg', 'distribusi_umpeg', 1, '2025-09-10 10:15:00'),
+(2, '02/REG/SM/2025', '2025-09-09', '2025-09-11', 'Disdukcapil', 'Permintaan Data Penduduk', '470', 'Permintaan data agregat kependudukan untuk keperluan perencanaan.', 'Review dan pastikan data terbaru.', NULL, 'Sekcam: teruskan ke Kasi Pemerintahan, balas paling lambat 3 hari.', 'Pemerintahan', 'sekcam', 1, '2025-09-11 08:10:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `surat_masuk_files`
+--
+
+CREATE TABLE `surat_masuk_files` (
+  `id` int NOT NULL,
+  `id_surat_masuk` int NOT NULL,
+  `nama_file_asli` varchar(255) NOT NULL,
+  `nama_file_unik` varchar(255) NOT NULL,
+  `path_file` varchar(255) NOT NULL,
+  `filesize` bigint DEFAULT NULL,
+  `jenis_lampiran` varchar(50) DEFAULT 'lampiran'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `surat_masuk_files`
+--
+
+INSERT INTO `surat_masuk_files` (`id`, `id_surat_masuk`, `nama_file_asli`, `nama_file_unik`, `path_file`, `filesize`, `jenis_lampiran`) VALUES
+(1, 1, 'kartu-disposisi-rakor.pdf', 'sm-01.pdf', 'uploads/surat_masuk/sm-01.pdf', 204800, 'kartu_disposisi'),
+(2, 2, 'scan-surat-disdukcapil.pdf', 'sm-02.pdf', 'uploads/surat_masuk/sm-02.pdf', 1048576, 'scan_surat');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pejabat`
 --
 
@@ -200,6 +259,8 @@ CREATE TABLE `surat_keluar` (
   `id_user_pembuat` int NOT NULL,
   `nama_file_pdf` varchar(255) NOT NULL,
   `path_file` varchar(255) NOT NULL,
+  `kode_klasifikasi` varchar(50) DEFAULT NULL,
+  `id_surat_masuk` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -235,7 +296,7 @@ CREATE TABLE `users` (
   `nama_lengkap` varchar(150) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL COMMENT 'Disimpan dalam bentuk hash',
-  `role` enum('admin','staf') NOT NULL DEFAULT 'staf'
+  `role` enum('admin','staf','camat','sekcam','unit') NOT NULL DEFAULT 'staf'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -243,8 +304,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `nama_lengkap`, `username`, `password`, `role`) VALUES
-(1, 'Staf Kecamatan', 'staf', '$2y$10$VmGAlK5XpyoW9Hmmqd6azew2SSFxF3eKpZ7Hl7wEkGYd7LPe/JsHG', 'staf'),
-(2, 'Admin Kecamatan', 'admin', '$2y$10$m/e.ezl0PN31sdmAMe9/0ONABjYwbS5BCDkLO/t857ZcEq22ASANe', 'admin');
+(1, 'Sri Rahayu, S.I.Kom', 'staf', '$2y$10$VmGAlK5XpyoW9Hmmqd6azew2SSFxF3eKpZ7Hl7wEkGYd7LPe/JsHG', 'staf'),
+(2, 'Admin Kecamatan', 'admin', '$2y$10$m/e.ezl0PN31sdmAMe9/0ONABjYwbS5BCDkLO/t857ZcEq22ASANe', 'admin'),
+(3, 'Agung Surachman Ali, S.STP.,MM', 'camat', '$2y$12$LFtVvPPQMjXMh7QG0L4El.f9Si45COZsetBLgX3qW9gke89Wm/vXS', 'camat'),
+(4, 'Subhi, SH., M.Si', 'sekcam', '$2y$12$y/FJ5PPZZV4spKGK.Kd.Ve9x7VvOnYdyT5ndsFWPYGHL55jP1FJJq', 'sekcam'),
+(5, 'Ape Harjani, SE', 'kasipenkes', '$2y$12$2LQtANz2kfTSRr12zBNmFeF2GNCnQvjueiO1jb2BKjcn55C7CGfa.', 'unit'),
+(6, 'Dodi Suwandi, S.SOS', 'kasipem', '$2y$12$VwsLUaX6mrVEF7a6GuScbOvY/gHQwXW8HracVTFPAAc0gRXtKrlg2', 'unit'),
+(7, 'Dadah Sa\'adah, SE.,M.Si', 'kasipm', '$2y$12$3P3Q9OIhyiiHnbctQzo1..KhtaOkCHnhQ55uuQHUzmdeZelr9RUZa', 'unit'),
+(8, 'Adi Prayudi, S.SOS', 'kasiekbang', '$2y$12$gFf6UBMutAeC5fbA8yTs5.3OArEZ2T8wOqB26wK.Vq/W2IK7yMcaG', 'unit'),
+(9, 'Kasi Trantibum', 'kasitrantibum', '$2y$12$BTzoqok4peKAeew6ywIdk.diTLVWqGlhGjKeyZCY/qfJetom44Wr.', 'unit');
 
 --
 -- Indexes for dumped tables
@@ -256,20 +324,24 @@ INSERT INTO `users` (`id`, `nama_lengkap`, `username`, `password`, `role`) VALUE
 ALTER TABLE `arsip`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_kategori` (`id_kategori`),
-  ADD KEY `id_user_uploader` (`id_user_uploader`);
+  ADD KEY `id_user_uploader` (`id_user_uploader`),
+  ADD KEY `idx_arsip_surat_masuk` (`id_surat_masuk`),
+  ADD KEY `idx_arsip_kode` (`kode_klasifikasi`);
 
 --
 -- Indexes for table `arsip_files`
 --
 ALTER TABLE `arsip_files`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_arsip` (`id_arsip`);
+  ADD KEY `id_arsip` (`id_arsip`),
+  ADD KEY `id_surat_masuk_file` (`id_surat_masuk_file`);
 
 --
 -- Indexes for table `kategori_arsip`
 --
 ALTER TABLE `kategori_arsip`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode` (`kode`);
 
 --
 -- Indexes for table `login_history`
@@ -290,7 +362,9 @@ ALTER TABLE `pejabat`
 ALTER TABLE `surat_keluar`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_tanggal` (`tanggal_surat`),
-  ADD KEY `idx_template` (`id_template`);
+  ADD KEY `idx_template` (`id_template`),
+  ADD KEY `idx_keluar_kode` (`kode_klasifikasi`),
+  ADD KEY `idx_keluar_surat_masuk` (`id_surat_masuk`);
 
 --
 -- Indexes for table `template_surat`
@@ -298,6 +372,22 @@ ALTER TABLE `surat_keluar`
 ALTER TABLE `template_surat`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `kode_template` (`kode_template`);
+
+--
+-- Indexes for table `surat_masuk`
+--
+ALTER TABLE `surat_masuk`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_kode` (`kode_klasifikasi`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_unit` (`unit_pengolah`);
+
+--
+-- Indexes for table `surat_masuk_files`
+--
+ALTER TABLE `surat_masuk_files`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_surat_masuk` (`id_surat_masuk`);
 
 --
 -- Indexes for table `users`
@@ -359,6 +449,18 @@ ALTER TABLE `users`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `surat_masuk`
+--
+ALTER TABLE `surat_masuk`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `surat_masuk_files`
+--
+ALTER TABLE `surat_masuk_files`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -367,19 +469,40 @@ ALTER TABLE `users`
 --
 ALTER TABLE `arsip`
   ADD CONSTRAINT `arsip_ibfk_1` FOREIGN KEY (`id_kategori`) REFERENCES `kategori_arsip` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  ADD CONSTRAINT `arsip_ibfk_2` FOREIGN KEY (`id_user_uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `arsip_ibfk_2` FOREIGN KEY (`id_user_uploader`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `arsip_ibfk_3` FOREIGN KEY (`id_surat_masuk`) REFERENCES `surat_masuk` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `arsip_files`
 --
 ALTER TABLE `arsip_files`
-  ADD CONSTRAINT `arsip_files_ibfk_1` FOREIGN KEY (`id_arsip`) REFERENCES `arsip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `arsip_files_ibfk_1` FOREIGN KEY (`id_arsip`) REFERENCES `arsip` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `arsip_files_ibfk_2` FOREIGN KEY (`id_surat_masuk_file`) REFERENCES `surat_masuk_files` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `login_history`
 --
 ALTER TABLE `login_history`
   ADD CONSTRAINT `login_history_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `surat_masuk`
+--
+ALTER TABLE `surat_masuk`
+  ADD CONSTRAINT `surat_masuk_ibfk_1` FOREIGN KEY (`id_user_pencatat`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `surat_keluar`
+--
+ALTER TABLE `surat_keluar`
+  ADD CONSTRAINT `surat_keluar_ibfk_1` FOREIGN KEY (`id_template`) REFERENCES `template_surat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `surat_keluar_ibfk_2` FOREIGN KEY (`id_surat_masuk`) REFERENCES `surat_masuk` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `surat_masuk_files`
+--
+ALTER TABLE `surat_masuk_files`
+  ADD CONSTRAINT `surat_masuk_files_ibfk_1` FOREIGN KEY (`id_surat_masuk`) REFERENCES `surat_masuk` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -18,7 +18,7 @@
             <select id="kategoriFilter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                 <option value="">Semua Kategori</option>
                 <?php foreach ($kategori as $kat) : ?>
-                    <option value="<?= htmlspecialchars($kat['id']); ?>"><?= htmlspecialchars($kat['nama_kategori']); ?></option>
+                    <option value="<?= htmlspecialchars($kat['id']); ?>"><?= htmlspecialchars($kat['kode'] . ' - ' . $kat['nama_kategori']); ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -121,12 +121,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const rowNumber = startIndex + index + 1;
             const downloadUrl = `${baseUrl}/arsip/download/${doc.id}`;
             const downloadTitle = doc.jumlah_file > 1 ? 'Unduh sebagai ZIP' : 'Unduh File';
-            
+            const kodeLabel = doc.kode_klasifikasi ? `<span class="px-2 py-1 rounded bg-slate-100 text-slate-700">${doc.kode_klasifikasi}</span>` : '';
+            const refLabel = doc.id_surat_masuk ? `<span class="px-2 py-1 rounded bg-emerald-50 text-emerald-700">Ref Surat Masuk #${doc.id_surat_masuk}</span>` : '';
+
             html += `
                 <tr class="border-b">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${rowNumber}</td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">${doc.judul}</div>
+                        <div class="flex flex-wrap gap-2 mt-2">${kodeLabel}${refLabel}</div>
                         <div class="text-sm text-gray-500 md:hidden mt-1">
                             <p><strong>Kategori:</strong> ${doc.nama_kategori}</p>
                             <p><strong>Jumlah File:</strong> ${doc.jumlah_file}</p>
