@@ -1,10 +1,5 @@
 <?php /* Form Surat Tugas */ ?>
 <div class="mb-4">
-  <label for="noSurat" class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat</label>
-  <input type="text" id="noSurat" name="noSurat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Contoh: 800.1.11.1/    -Umpeg">
-</div>
-
-<div class="mb-4">
   <label for="tglSurat" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Surat</label>
   <input type="date" id="tglSurat" name="tglSurat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
 </div>
@@ -14,25 +9,90 @@
   <textarea id="dasarSurat" name="dasarSurat" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Masukkan dasar surat, bisa lebih dari satu baris..."></textarea>
 </div>
 
-<h4 class="font-semibold mt-6 mb-2 text-gray-800">Data Pegawai (Kepada)</h4>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div class="mb-4">
-    <label for="pegawaiNama" class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
-    <input type="text" id="pegawaiNama" name="pegawaiNama" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-  </div>
-  <div class="mb-4">
-    <label for="pegawaiPangkat" class="block text-sm font-medium text-gray-700 mb-1">Pangkat/Gol</label>
-    <input type="text" id="pegawaiPangkat" name="pegawaiPangkat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-  </div>
-  <div class="mb-4">
-    <label for="pegawaiNip" class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
-    <input type="text" id="pegawaiNip" name="pegawaiNip" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-  </div>
-  <div class="mb-4">
-    <label for="pegawaiJabatan" class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
-    <input type="text" id="pegawaiJabatan" name="pegawaiJabatan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+<h4 class="font-semibold mt-6 mb-2 text-gray-800 flex items-center justify-between">
+  Data Pegawai (Kepada)
+  <button type="button" id="btnAddPegawai" class="text-sm bg-blue-600 text-white px-3 py-1 rounded shadow">Tambah</button>
+</h4>
+
+<div id="pegawaiRepeater" class="space-y-4">
+  <div class="pegawai-item grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-md p-4 relative">
+    <button type="button" class="btn-remove-pegawai absolute -right-3 -top-3 bg-red-500 text-white w-8 h-8 rounded-full shadow hidden">
+      &times;
+    </button>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Nama</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nama">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nama][]" value="1" data-visibility-flag="nama">
+      <input type="text" data-field="nama" name="pegawai[nama][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Pangkat/Gol</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="pangkat">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_pangkat][]" value="1" data-visibility-flag="pangkat">
+      <input type="text" data-field="pangkat" name="pegawai[pangkat][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">NIP</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nip">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nip][]" value="1" data-visibility-flag="nip">
+      <input type="text" data-field="nip" name="pegawai[nip][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Jabatan</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="jabatan">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_jabatan][]" value="1" data-visibility-flag="jabatan">
+      <input type="text" data-field="jabatan" name="pegawai[jabatan][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
   </div>
 </div>
+
+<template id="pegawai-template">
+  <div class="pegawai-item grid grid-cols-1 md:grid-cols-2 gap-4 border rounded-md p-4 relative">
+    <button type="button" class="btn-remove-pegawai absolute -right-3 -top-3 bg-red-500 text-white w-8 h-8 rounded-full shadow">
+      &times;
+    </button>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Nama</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nama">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nama][]" value="1" data-visibility-flag="nama">
+      <input type="text" data-field="nama" name="pegawai[nama][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Pangkat/Gol</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="pangkat">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_pangkat][]" value="1" data-visibility-flag="pangkat">
+      <input type="text" data-field="pangkat" name="pegawai[pangkat][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">NIP</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nip">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nip][]" value="1" data-visibility-flag="nip">
+      <input type="text" data-field="nip" name="pegawai[nip][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Jabatan</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="jabatan">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_jabatan][]" value="1" data-visibility-flag="jabatan">
+      <input type="text" data-field="jabatan" name="pegawai[jabatan][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+    </div>
+  </div>
+</template>
 
 <div class="mb-6">
   <label for="tugasSurat" class="block text-sm font-medium text-gray-700 mb-1">Untuk (Detail Tugas)</label>
