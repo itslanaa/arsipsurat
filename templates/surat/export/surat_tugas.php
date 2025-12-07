@@ -92,7 +92,7 @@
       <td style="vertical-align:top;">Untuk</td>
       <td style="vertical-align:top;">:</td>
       <td style="vertical-align:top; white-space: pre-wrap;">
-        <?= $tugasSuratPlain ?>
+        <?= nl2br($tugasSuratPlain) ?>
       </td>
     </tr>
   </table>
