@@ -173,15 +173,17 @@ INSERT INTO `login_history` (`id`, `id_user`, `login_time`, `ip_address`, `user_
 CREATE TABLE `surat_masuk` (
   `id` int NOT NULL,
   `nomor_agenda` varchar(50) NOT NULL,
+  `tanggal_surat` date DEFAULT NULL,
   `tanggal_terima` date NOT NULL,
   `asal_surat` varchar(150) NOT NULL,
   `perihal` varchar(255) NOT NULL,
   `kode_klasifikasi` varchar(50) NOT NULL,
   `ringkasan` text,
   `instruksi_camat` text,
+  `catatan_koreksi` text,
   `disposisi_sekcam` text,
   `unit_pengolah` varchar(100) DEFAULT NULL,
-  `status` enum('diterima','instruksi_camat','sekcam','distribusi_umpeg','diproses_unit','selesai') NOT NULL DEFAULT 'diterima',
+  `status` enum('diterima','instruksi_camat','koreksi','sekcam','distribusi_umpeg','diproses_unit','selesai') NOT NULL DEFAULT 'diterima',
   `id_user_pencatat` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -190,9 +192,9 @@ CREATE TABLE `surat_masuk` (
 -- Dumping data for table `surat_masuk`
 --
 
-INSERT INTO `surat_masuk` (`id`, `nomor_agenda`, `tanggal_terima`, `asal_surat`, `perihal`, `kode_klasifikasi`, `ringkasan`, `instruksi_camat`, `disposisi_sekcam`, `unit_pengolah`, `status`, `id_user_pencatat`, `created_at`) VALUES
-(1, '01/REG/SM/2025', '2025-09-10', 'Sekretariat Daerah', 'Undangan Rakor Stunting', '800.1', 'Undangan rapat koordinasi penanganan stunting tingkat kabupaten.', 'Mohon hadir dan siapkan bahan paparan.', 'Sekcam: tugaskan ke Umpeg, hadirkan staf terkait.', 'Umpeg', 'distribusi_umpeg', 1, '2025-09-10 10:15:00'),
-(2, '02/REG/SM/2025', '2025-09-11', 'Disdukcapil', 'Permintaan Data Penduduk', '470', 'Permintaan data agregat kependudukan untuk keperluan perencanaan.', 'Review dan pastikan data terbaru.', 'Sekcam: teruskan ke Kasi Pemerintahan, balas paling lambat 3 hari.', 'Pemerintahan', 'sekcam', 1, '2025-09-11 08:10:00');
+INSERT INTO `surat_masuk` (`id`, `nomor_agenda`, `tanggal_surat`, `tanggal_terima`, `asal_surat`, `perihal`, `kode_klasifikasi`, `ringkasan`, `instruksi_camat`, `catatan_koreksi`, `disposisi_sekcam`, `unit_pengolah`, `status`, `id_user_pencatat`, `created_at`) VALUES
+(1, '01/REG/SM/2025', '2025-09-05', '2025-09-10', 'Sekretariat Daerah', 'Undangan Rakor Stunting', '800.1', 'Undangan rapat koordinasi penanganan stunting tingkat kabupaten.', 'Mohon hadir dan siapkan bahan paparan.', NULL, 'Sekcam: tugaskan ke Umpeg, hadirkan staf terkait.', 'Umpeg', 'distribusi_umpeg', 1, '2025-09-10 10:15:00'),
+(2, '02/REG/SM/2025', '2025-09-09', '2025-09-11', 'Disdukcapil', 'Permintaan Data Penduduk', '470', 'Permintaan data agregat kependudukan untuk keperluan perencanaan.', 'Review dan pastikan data terbaru.', NULL, 'Sekcam: teruskan ke Kasi Pemerintahan, balas paling lambat 3 hari.', 'Pemerintahan', 'sekcam', 1, '2025-09-11 08:10:00');
 
 -- --------------------------------------------------------
 
@@ -294,7 +296,7 @@ CREATE TABLE `users` (
   `nama_lengkap` varchar(150) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL COMMENT 'Disimpan dalam bentuk hash',
-  `role` enum('admin','staf') NOT NULL DEFAULT 'staf'
+  `role` enum('admin','staf','camat','sekcam','unit') NOT NULL DEFAULT 'staf'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -302,8 +304,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `nama_lengkap`, `username`, `password`, `role`) VALUES
-(1, 'Staf Kecamatan', 'staf', '$2y$10$VmGAlK5XpyoW9Hmmqd6azew2SSFxF3eKpZ7Hl7wEkGYd7LPe/JsHG', 'staf'),
-(2, 'Admin Kecamatan', 'admin', '$2y$10$m/e.ezl0PN31sdmAMe9/0ONABjYwbS5BCDkLO/t857ZcEq22ASANe', 'admin');
+(1, 'Sri Rahayu, S.I.Kom', 'staf', '$2y$10$VmGAlK5XpyoW9Hmmqd6azew2SSFxF3eKpZ7Hl7wEkGYd7LPe/JsHG', 'staf'),
+(2, 'Admin Kecamatan', 'admin', '$2y$10$m/e.ezl0PN31sdmAMe9/0ONABjYwbS5BCDkLO/t857ZcEq22ASANe', 'admin'),
+(3, 'Agung Surachman Ali, S.STP.,MM', 'camat', '$2y$12$LFtVvPPQMjXMh7QG0L4El.f9Si45COZsetBLgX3qW9gke89Wm/vXS', 'camat'),
+(4, 'Subhi, SH., M.Si', 'sekcam', '$2y$12$y/FJ5PPZZV4spKGK.Kd.Ve9x7VvOnYdyT5ndsFWPYGHL55jP1FJJq', 'sekcam'),
+(5, 'Ape Harjani, SE', 'kasipenkes', '$2y$12$2LQtANz2kfTSRr12zBNmFeF2GNCnQvjueiO1jb2BKjcn55C7CGfa.', 'unit'),
+(6, 'Dodi Suwandi, S.SOS', 'kasipem', '$2y$12$VwsLUaX6mrVEF7a6GuScbOvY/gHQwXW8HracVTFPAAc0gRXtKrlg2', 'unit'),
+(7, 'Dadah Sa\'adah, SE.,M.Si', 'kasipm', '$2y$12$3P3Q9OIhyiiHnbctQzo1..KhtaOkCHnhQ55uuQHUzmdeZelr9RUZa', 'unit'),
+(8, 'Adi Prayudi, S.SOS', 'kasiekbang', '$2y$12$gFf6UBMutAeC5fbA8yTs5.3OArEZ2T8wOqB26wK.Vq/W2IK7yMcaG', 'unit'),
+(9, 'Kasi Trantibum', 'kasitrantibum', '$2y$12$BTzoqok4peKAeew6ywIdk.diTLVWqGlhGjKeyZCY/qfJetom44Wr.', 'unit');
 
 --
 -- Indexes for dumped tables

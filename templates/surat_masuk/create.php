@@ -13,6 +13,10 @@
             <input type="text" name="nomor_agenda" required class="mt-1 w-full border rounded-md p-2" placeholder="01/REG/SM/2025">
         </div>
         <div>
+            <label class="block text-sm font-medium text-gray-700">Tanggal Surat</label>
+            <input type="date" name="tanggal_surat" class="mt-1 w-full border rounded-md p-2">
+        </div>
+        <div>
             <label class="block text-sm font-medium text-gray-700">Tanggal Terima</label>
             <input type="date" name="tanggal_terima" required class="mt-1 w-full border rounded-md p-2">
         </div>
@@ -36,7 +40,12 @@
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Unit Pengolah (opsional)</label>
-            <input type="text" name="unit_pengolah" class="mt-1 w-full border rounded-md p-2" placeholder="Umpeg / Pembangunan / Trantib">
+            <select name="unit_pengolah" class="mt-1 w-full border rounded-md p-2">
+                <option value="">-- Pilih Unit --</option>
+                <?php foreach (($unit_options ?? []) as $u): ?>
+                    <option value="<?= htmlspecialchars($u); ?>"><?= htmlspecialchars($u); ?></option>
+                <?php endforeach; ?>
+            </select>
         </div>
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700">Ringkasan & Lampiran</label>

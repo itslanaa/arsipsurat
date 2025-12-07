@@ -17,3 +17,15 @@ function formatBytes($bytes, $precision = 2) {
     }
     return '0 B';
 }
+
+function currentRole(): string {
+    return $_SESSION['role'] ?? 'staf';
+}
+
+function ensureRole(array $allowed)
+{
+    if (!in_array(currentRole(), $allowed, true)) {
+        header('Location: ' . BASE_URL . '/suratmasuk');
+        exit;
+    }
+}

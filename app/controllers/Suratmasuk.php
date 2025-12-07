@@ -2,6 +2,8 @@
 
 class Suratmasuk extends Controller
 {
+    private array $unitOptions = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Sekretariat'];
+
     public function __construct()
     {
         if (!isset($_SESSION['login'])) {
@@ -19,6 +21,7 @@ class Suratmasuk extends Controller
         $data['status_count'] = $model->countByStatus();
         $data['total_surat_masuk'] = $model->countTotal();
         $data['kategori_arsip'] = $kategoriModel->getAllKategori();
+        $data['unit_options'] = $this->unitOptions;
 
         $this->view('layouts/header', $data);
         $this->view('layouts/sidebar', $data);
@@ -28,8 +31,10 @@ class Suratmasuk extends Controller
 
     public function create()
     {
+        ensureRole(['admin', 'staf']);
         $data['judul'] = 'Input Surat Masuk';
         $data['kategori_arsip'] = $this->model('Kategori_model')->getAllKategori();
+        $data['unit_options'] = $this->unitOptions;
         $this->view('layouts/header', $data);
         $this->view('layouts/sidebar', $data);
         $this->view('surat_masuk/create', $data);
@@ -38,6 +43,7 @@ class Suratmasuk extends Controller
 
     public function store()
     {
+        ensureRole(['admin', 'staf']);
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . '/suratmasuk');
             exit;
@@ -55,6 +61,11 @@ class Suratmasuk extends Controller
 
     public function update($id)
     {
+        if (currentRole() === 'unit') {
+            Flasher::setFlash('Disposisi', 'Unit pengolah hanya dapat menekan tombol Terima.', 'info');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . '/suratmasuk');
             exit;
@@ -72,6 +83,7 @@ class Suratmasuk extends Controller
 
     public function arsipkan($id)
     {
+        ensureRole(['admin', 'staf']);
         $model = $this->model('Suratmasuk_model');
         $surat = $model->getById((int)$id);
         if (!$surat) {
@@ -126,5 +138,65 @@ class Suratmasuk extends Controller
         $createdId = $kategoriModel->getOrCreateByKode($kode, $nama);
 
         return ['id' => $createdId, 'kode' => $kode, 'nama' => $nama];
+    }
+
+    public function terima($id)
+    {
+        if (currentRole() !== 'unit') {
+            Flasher::setFlash('Disposisi', 'Hanya unit pengolah yang dapat menandai selesai.', 'error');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
+        $model = $this->model('Suratmasuk_model');
+        $updated = $model->terimaOlehUnit((int)$id);
+        if ($updated > 0) {
+            Flasher::setFlash('Surat', 'diterima dan dinyatakan selesai oleh unit.', 'success');
+        } else {
+            Flasher::setFlash('Surat', 'belum bisa ditandai selesai.', 'error');
+        }
+        header('Location: ' . BASE_URL . '/suratmasuk');
+        exit;
+    }
+
+    public function cetakDisposisi($id)
+    {
+        if (!in_array(currentRole(), ['camat', 'sekcam', 'staf', 'admin'], true)) {
+            Flasher::setFlash('Akses', 'Anda tidak diperkenankan mencetak kartu disposisi.', 'error');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
+
+        $surat = $this->model('Suratmasuk_model')->getById((int)$id);
+        if (!$surat) {
+            Flasher::setFlash('Surat', 'Data tidak ditemukan.', 'error');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
+
+        $kategoriModel = $this->model('Kategori_model');
+        $kategori = $kategoriModel->getKategoriByKode($surat['kode_klasifikasi'] ?? '') ?? [];
+
+        $data = [
+            'surat' => $surat,
+            'kategori' => $kategori,
+            'unit_options' => $this->unitOptions,
+        ];
+
+        ob_start();
+        extract($data);
+        require APPROOT . '/templates/surat_masuk/disposisi_pdf.php';
+        $html = ob_get_clean();
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => [210, 148],
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('kartu-disposisi.pdf', 'I');
+        exit;
     }
 }
