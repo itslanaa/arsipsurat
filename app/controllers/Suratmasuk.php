@@ -2,7 +2,7 @@
 
 class Suratmasuk extends Controller
 {
-    private array $unitOptions = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Sekretariat'];
+    private array $unitOptions = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
 
     public function __construct()
     {
@@ -148,6 +148,12 @@ class Suratmasuk extends Controller
             exit;
         }
         $model = $this->model('Suratmasuk_model');
+        $surat = $model->getById((int)$id);
+        if (!$surat || !$model->isSuratVisibleToCurrentUnit($surat)) {
+            Flasher::setFlash('Surat', 'Tidak dapat mengakses surat untuk unit lain.', 'error');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
         $updated = $model->terimaOlehUnit((int)$id);
         if ($updated > 0) {
             Flasher::setFlash('Surat', 'diterima dan dinyatakan selesai oleh unit.', 'success');
