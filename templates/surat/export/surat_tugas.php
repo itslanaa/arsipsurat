@@ -60,21 +60,24 @@
       <td class="w-5"  style="vertical-align:top;">:</td>
       <td class="w-80" style="vertical-align:top;">
         <?php if (count($pegawaiList) <= 1): ?>
+          <?php $pg = $pegawaiList[0] ?? []; ?>
           <table style="width:100%;">
-            <tr><td style="width:25%;">Nama</td><td>: <?= $pegawaiList[0]['nama'] ?? '' ?></td></tr>
-            <tr><td>Pangkat/gol</td><td>: <?= $pegawaiList[0]['pangkat'] ?? '' ?></td></tr>
-            <tr><td>NIP</td><td>: <?= $pegawaiList[0]['nip'] ?? '' ?></td></tr>
-            <tr><td>Jabatan</td><td>: <?= $pegawaiList[0]['jabatan'] ?? '' ?></td></tr>
+            <?php if (($pg['visible_nama'] ?? true) || !isset($pg['visible_nama'])): ?><tr><td style="width:25%;">Nama</td><td>: <?= $pg['nama'] ?? '' ?></td></tr><?php endif; ?>
+            <?php if (($pg['visible_pangkat'] ?? true) || !isset($pg['visible_pangkat'])): ?><tr><td>Pangkat/gol</td><td>: <?= $pg['pangkat'] ?? '' ?></td></tr><?php endif; ?>
+            <?php if (($pg['visible_nip'] ?? true) || !isset($pg['visible_nip'])): ?><tr><td>NIP</td><td>: <?= $pg['nip'] ?? '' ?></td></tr><?php endif; ?>
+            <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><tr><td>Jabatan</td><td>: <?= $pg['jabatan'] ?? '' ?></td></tr><?php endif; ?>
           </table>
         <?php else: ?>
           <ol style="margin:0; padding-left: 18px;">
-            <?php foreach ($pegawaiList as $idx => $pg): ?>
+            <?php foreach ($pegawaiList as $pg): ?>
               <li style="margin-bottom:8px;">
-                <div><strong><?= $idx + 1 ?>.</strong> <?= $pg['nama'] ?? '' ?></div>
+                <?php if (($pg['visible_nama'] ?? true) || !isset($pg['visible_nama'])): ?>
+                  <div><strong><?= $pg['nama'] ?: '-' ?></strong></div>
+                <?php endif; ?>
                 <div style="padding-left:14px;">
-                  <div>Pangkat/Gol : <?= $pg['pangkat'] ?? '' ?></div>
-                  <div>NIP : <?= $pg['nip'] ?? '' ?></div>
-                  <div>Jabatan : <?= $pg['jabatan'] ?? '' ?></div>
+                  <?php if (($pg['visible_pangkat'] ?? true) || !isset($pg['visible_pangkat'])): ?><div>Pangkat/Gol : <?= $pg['pangkat'] ?? '' ?></div><?php endif; ?>
+                  <?php if (($pg['visible_nip'] ?? true) || !isset($pg['visible_nip'])): ?><div>NIP : <?= $pg['nip'] ?? '' ?></div><?php endif; ?>
+                  <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><div>Jabatan : <?= $pg['jabatan'] ?? '' ?></div><?php endif; ?>
                 </div>
               </li>
             <?php endforeach; ?>

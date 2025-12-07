@@ -5,15 +5,33 @@
 ?>
 <style>
   .preview-scroll {
-    max-height: calc(100vh - 180px);
+    max-height: calc(100vh - 140px);
     overflow: auto;
   }
   .preview-frame {
     background: #fff;
     max-width: 900px;
+    width: min(900px, 100%);
+    min-height: 1120px;
     margin: 0 auto;
-    padding: 24px 28px;
+    padding: 32px 36px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+  .preview-zoomable {
+    transform-origin: top center;
+    transition: transform 150ms ease;
+  }
+  .preview-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .field-hidden {
+    opacity: 0.6;
+  }
+  .field-hidden input,
+  .field-hidden label {
+    text-decoration: line-through;
   }
 </style>
 
@@ -85,8 +103,17 @@
 
   <!-- Kolom Live Preview -->
   <div class="bg-gray-200 p-4 rounded-lg preview-scroll">
+    <div class="flex items-center justify-between mb-3 preview-toolbar">
+      <p class="font-semibold text-gray-700">Live Preview</p>
+      <div class="flex items-center gap-2 text-sm text-gray-700">
+        <label for="previewZoom" class="whitespace-nowrap">Zoom</label>
+        <input type="range" id="previewZoom" min="80" max="120" step="5" value="100"
+          class="w-32 accent-blue-600">
+        <span id="previewZoomValue">100%</span>
+      </div>
+    </div>
     <div class="preview-container" id="preview-wrapper">
-      <div id="preview-container" class="preview-frame">
+      <div id="preview-container" class="preview-frame preview-zoomable">
         <?php include __DIR__ . '/partials/preview_surat_tugas.php'; ?>
       </div>
     </div>
@@ -185,6 +212,9 @@
   const nomorSuratInput = document.getElementById('noSurat');
   const suratMasukSelect = document.getElementById('id_surat_masuk');
   const btnExportDoc = document.getElementById('btnExportDOC');
+  const previewZoom = document.getElementById('previewZoom');
+  const previewZoomValue = document.getElementById('previewZoomValue');
+  const previewZoomTarget = document.getElementById('preview-container');
 
   function composeNomorSurat() {
     const kode = (kodeKlasifikasiInput?.value || '').trim();
@@ -238,6 +268,18 @@
       form.appendChild(s);
       form.submit();
     });
+  }
+
+  function setPreviewZoom(val) {
+    const scale = parseInt(val || '100', 10) / 100;
+    if (previewZoomTarget) {
+      previewZoomTarget.style.transform = `scale(${scale})`;
+    }
+    if (previewZoomValue) previewZoomValue.textContent = `${val}%`;
+  }
+  if (previewZoom) {
+    setPreviewZoom(previewZoom.value);
+    previewZoom.addEventListener('input', (e) => setPreviewZoom(e.target.value));
   }
 
 </script>
@@ -375,13 +417,46 @@
     fetch(`<?= BASE_URL ?>/surat/get_partial?part=preview&template=${template}`)
       .then(res => res.text())
       .then(html => {
-        previewContainer.innerHTML = `<div class="preview-frame">${html}</div>`;
+        previewContainer.innerHTML = `<div class="preview-frame preview-zoomable">${html}</div>`;
         // setelah preview ganti, refresh isian dari form ke preview
         updatePreviewFromForm(template);
       });
   });
 
   /* inisialisasi default: template 'tugas' */
+  const PEGAWAI_FIELDS = ['nama', 'pangkat', 'nip', 'jabatan'];
+
+  function isFieldVisible(row, field) {
+    const flag = row.querySelector(`[name="pegawai[visible_${field}][]"]`);
+    return !flag || flag.value !== '0';
+  }
+
+  function setFieldVisibility(row, field, visible) {
+    const flag = row.querySelector(`[name="pegawai[visible_${field}][]"]`);
+    if (flag) flag.value = visible ? '1' : '0';
+    const toggle = row.querySelector(`[data-toggle-target="${field}"]`);
+    if (toggle) {
+      toggle.textContent = visible ? 'Sembunyikan' : 'Tampilkan';
+      toggle.classList.toggle('text-gray-400', !visible);
+    }
+    const wrapper = flag ? flag.closest('.mb-4') : null;
+    if (wrapper) wrapper.classList.toggle('field-hidden', !visible);
+  }
+
+  function bindVisibilityToggles(row) {
+    PEGAWAI_FIELDS.forEach(field => {
+      const btn = row.querySelector(`[data-toggle-target="${field}"]`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const next = !isFieldVisible(row, field);
+          setFieldVisibility(row, field, next);
+          renderPegawaiPreview();
+        });
+        setFieldVisibility(row, field, isFieldVisible(row, field));
+      }
+    });
+  }
+
   function collectPegawai() {
     const rows = document.querySelectorAll('.pegawai-item');
     const data = [];
@@ -391,10 +466,22 @@
       const nip = row.querySelector('[data-field="nip"]')?.value?.trim() ?? '';
       const jabatan = row.querySelector('[data-field="jabatan"]')?.value?.trim() ?? '';
       if (nama || pangkat || nip || jabatan) {
-        data.push({ nama, pangkat, nip, jabatan });
+        data.push({
+          nama,
+          pangkat,
+          nip,
+          jabatan,
+          visible_nama: isFieldVisible(row, 'nama'),
+          visible_pangkat: isFieldVisible(row, 'pangkat'),
+          visible_nip: isFieldVisible(row, 'nip'),
+          visible_jabatan: isFieldVisible(row, 'jabatan'),
+        });
       }
     });
-    return data.length ? data : [{ nama: '', pangkat: '', nip: '', jabatan: '' }];
+    return data.length ? data : [{
+      nama: '', pangkat: '', nip: '', jabatan: '',
+      visible_nama: true, visible_pangkat: true, visible_nip: true, visible_jabatan: true,
+    }];
   }
 
   function renderPegawaiPreview() {
@@ -415,24 +502,37 @@
     if (data.length === 1) {
       singleWrap.classList.remove('hidden');
       multiWrap.classList.add('hidden');
-      setText('preview-pegawaiNama', data[0].nama);
-      setText('preview-pegawaiPangkat', data[0].pangkat);
-      setText('preview-pegawaiNip', data[0].nip);
-      setText('preview-pegawaiJabatan', data[0].jabatan);
+      const pg = data[0];
+      const toggleRow = (id, show) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !show);
+      };
+      toggleRow('preview-row-nama', pg.visible_nama !== false);
+      toggleRow('preview-row-pangkat', pg.visible_pangkat !== false);
+      toggleRow('preview-row-nip', pg.visible_nip !== false);
+      toggleRow('preview-row-jabatan', pg.visible_jabatan !== false);
+      setText('preview-pegawaiNama', pg.visible_nama !== false ? pg.nama : '');
+      setText('preview-pegawaiPangkat', pg.visible_pangkat !== false ? pg.pangkat : '');
+      setText('preview-pegawaiNip', pg.visible_nip !== false ? pg.nip : '');
+      setText('preview-pegawaiJabatan', pg.visible_jabatan !== false ? pg.jabatan : '');
     } else {
       singleWrap.classList.add('hidden');
       multiWrap.classList.remove('hidden');
       listEl.innerHTML = '';
-      data.forEach((row, idx) => {
+      data.forEach((row) => {
         const li = document.createElement('li');
         li.className = 'mb-3';
-        li.innerHTML = `
-          <div><strong>${idx + 1}.</strong> ${row.nama || '-'}</div>
-          <div style="padding-left:18px;">
-            <div>Pangkat/Gol : ${row.pangkat || '-'}</div>
-            <div>NIP : ${row.nip || '-'}</div>
-            <div>Jabatan : ${row.jabatan || '-'}</div>
-          </div>`;
+        const lines = [];
+        if (row.visible_nama !== false) {
+          lines.push(`<div><strong>${row.nama || '-'}</strong></div>`);
+        }
+        const sub = [];
+        if (row.visible_pangkat !== false) sub.push(`<div>Pangkat/Gol : ${row.pangkat || '-'}</div>`);
+        if (row.visible_nip !== false) sub.push(`<div>NIP : ${row.nip || '-'}</div>`);
+        if (row.visible_jabatan !== false) sub.push(`<div>Jabatan : ${row.jabatan || '-'}</div>`);
+        if (sub.length) lines.push(`<div style="padding-left:18px;">${sub.join('')}</div>`);
+        if (!lines.length) lines.push('<div>-</div>');
+        li.innerHTML = lines.join('');
         listEl.appendChild(li);
       });
     }
@@ -451,6 +551,7 @@
           renderPegawaiPreview();
         }));
       });
+      bindVisibilityToggles(row);
       const rm = row.querySelector('.btn-remove-pegawai');
       if (rm) {
         rm.addEventListener('click', () => {
