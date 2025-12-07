@@ -149,6 +149,10 @@ class Surat extends Controller
                     'pangkat' => $e($arr['pangkat'][$i] ?? ''),
                     'nip'     => $e($arr['nip'][$i] ?? ''),
                     'jabatan' => $e($arr['jabatan'][$i] ?? ''),
+                    'visible_nama' => !isset($arr['visible_nama'][$i]) || $arr['visible_nama'][$i] != '0',
+                    'visible_pangkat' => !isset($arr['visible_pangkat'][$i]) || $arr['visible_pangkat'][$i] != '0',
+                    'visible_nip' => !isset($arr['visible_nip'][$i]) || $arr['visible_nip'][$i] != '0',
+                    'visible_jabatan' => !isset($arr['visible_jabatan'][$i]) || $arr['visible_jabatan'][$i] != '0',
                 ];
             }
         } else {
@@ -157,6 +161,10 @@ class Surat extends Controller
                 'pangkat' => $e($post['pegawaiPangkat'] ?? ''),
                 'nip'     => $e($post['pegawaiNip'] ?? ''),
                 'jabatan' => $e($post['pegawaiJabatan'] ?? ''),
+                'visible_nama' => true,
+                'visible_pangkat' => true,
+                'visible_nip' => true,
+                'visible_jabatan' => true,
             ];
         }
 

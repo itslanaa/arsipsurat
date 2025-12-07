@@ -44,10 +44,10 @@
         <td class="align-top" style="width: 80%;">
           <div id="preview-pegawai-single">
             <table class="w-full">
-              <tr><td style="width: 25%;">Nama</td><td>: <span id="preview-pegawaiNama"></span></td></tr>
-              <tr><td>Pangkat/gol</td><td>: <span id="preview-pegawaiPangkat"></span></td></tr>
-              <tr><td>NIP</td><td>: <span id="preview-pegawaiNip"></span></td></tr>
-              <tr><td>Jabatan</td><td>: <span id="preview-pegawaiJabatan"></span></td></tr>
+              <tr id="preview-row-nama"><td style="width: 25%;">Nama</td><td>: <span id="preview-pegawaiNama"></span></td></tr>
+              <tr id="preview-row-pangkat"><td>Pangkat/gol</td><td>: <span id="preview-pegawaiPangkat"></span></td></tr>
+              <tr id="preview-row-nip"><td>NIP</td><td>: <span id="preview-pegawaiNip"></span></td></tr>
+              <tr id="preview-row-jabatan"><td>Jabatan</td><td>: <span id="preview-pegawaiJabatan"></span></td></tr>
             </table>
           </div>
           <div id="preview-pegawai-multi" class="hidden">

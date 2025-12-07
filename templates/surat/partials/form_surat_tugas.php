@@ -20,19 +20,35 @@
       &times;
     </button>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Nama</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nama">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nama][]" value="1" data-visibility-flag="nama">
       <input type="text" data-field="nama" name="pegawai[nama][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat/Gol</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Pangkat/Gol</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="pangkat">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_pangkat][]" value="1" data-visibility-flag="pangkat">
       <input type="text" data-field="pangkat" name="pegawai[pangkat][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">NIP</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nip">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nip][]" value="1" data-visibility-flag="nip">
       <input type="text" data-field="nip" name="pegawai[nip][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Jabatan</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="jabatan">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_jabatan][]" value="1" data-visibility-flag="jabatan">
       <input type="text" data-field="jabatan" name="pegawai[jabatan][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
   </div>
@@ -44,19 +60,35 @@
       &times;
     </button>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Nama</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Nama</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nama">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nama][]" value="1" data-visibility-flag="nama">
       <input type="text" data-field="nama" name="pegawai[nama][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Pangkat/Gol</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Pangkat/Gol</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="pangkat">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_pangkat][]" value="1" data-visibility-flag="pangkat">
       <input type="text" data-field="pangkat" name="pegawai[pangkat][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">NIP</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="nip">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_nip][]" value="1" data-visibility-flag="nip">
       <input type="text" data-field="nip" name="pegawai[nip][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Jabatan</label>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-sm font-medium text-gray-700">Jabatan</label>
+        <button type="button" class="text-xs text-blue-600 hover:text-blue-700 toggle-visible" data-toggle-target="jabatan">Sembunyikan</button>
+      </div>
+      <input type="hidden" name="pegawai[visible_jabatan][]" value="1" data-visibility-flag="jabatan">
       <input type="text" data-field="jabatan" name="pegawai[jabatan][]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
     </div>
   </div>
