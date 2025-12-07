@@ -52,7 +52,9 @@
             </table>
           </div>
           <div id="preview-pegawai-multi" class="hidden">
-            <ol id="preview-pegawai-list" style="margin:0; padding-left:18px;"></ol>
+            <table style="width:100%; border-collapse:collapse;">
+              <tbody id="preview-pegawai-list"></tbody>
+            </table>
           </div>
         </td>
       </tr>
@@ -70,7 +72,7 @@
     <tr>
       <td style="width:60%;"></td>
       <td style="width:40%; text-align:center; vertical-align:top;">
-        <p id="preview-tglSurat"></p>
+        <p>Cibungbulang, <span id="preview-tglSurat"></span></p>
         <p style="font-weight:bold;"><?= htmlspecialchars($pejabat['jabatan'] ?? 'Camat'); ?>,</p>
         <div style="height:22mm;"></div>
         <div style="height:22mm;"></div>
