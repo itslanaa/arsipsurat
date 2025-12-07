@@ -30,7 +30,7 @@ class Suratmasuk_model
 
     public function getReferensiKeluar($limit = 100)
     {
-        $sql = "SELECT id, nomor_agenda, perihal, kode_klasifikasi, unit_pengolah, status
+        $sql = "SELECT id, nomor_agenda, perihal, kode_klasifikasi, unit_pengolah, status, tanggal_surat
                 FROM {$this->table}
                 WHERE kode_klasifikasi <> ''
                 ORDER BY created_at DESC
@@ -59,18 +59,20 @@ class Suratmasuk_model
     public function create(array $data, array $files)
     {
         $query = "INSERT INTO {$this->table}
-                    (nomor_agenda, tanggal_terima, asal_surat, perihal, kode_klasifikasi, ringkasan, instruksi_camat, disposisi_sekcam, unit_pengolah, status, id_user_pencatat)
+                    (nomor_agenda, tanggal_surat, tanggal_terima, asal_surat, perihal, kode_klasifikasi, ringkasan, instruksi_camat, catatan_koreksi, disposisi_sekcam, unit_pengolah, status, id_user_pencatat)
                   VALUES
-                    (:nomor_agenda, :tanggal_terima, :asal_surat, :perihal, :kode_klasifikasi, :ringkasan, :instruksi_camat, :disposisi_sekcam, :unit_pengolah, :status, :id_user_pencatat)";
+                    (:nomor_agenda, :tanggal_surat, :tanggal_terima, :asal_surat, :perihal, :kode_klasifikasi, :ringkasan, :instruksi_camat, :catatan_koreksi, :disposisi_sekcam, :unit_pengolah, :status, :id_user_pencatat)";
 
         $this->db->query($query);
         $this->db->bind('nomor_agenda', trim($data['nomor_agenda'] ?? ''));
+        $this->db->bind('tanggal_surat', $this->normalizeOptionalDate($data['tanggal_surat'] ?? null));
         $this->db->bind('tanggal_terima', $this->normalizeDate($data['tanggal_terima'] ?? ''));
         $this->db->bind('asal_surat', trim($data['asal_surat'] ?? ''));
         $this->db->bind('perihal', trim($data['perihal'] ?? ''));
         $this->db->bind('kode_klasifikasi', trim($data['kode_klasifikasi'] ?? ''));
         $this->db->bind('ringkasan', trim($data['ringkasan'] ?? ''));
         $this->db->bind('instruksi_camat', trim($data['instruksi_camat'] ?? ''));
+        $this->db->bind('catatan_koreksi', trim($data['catatan_koreksi'] ?? ''));
         $this->db->bind('disposisi_sekcam', trim($data['disposisi_sekcam'] ?? ''));
         $this->db->bind('unit_pengolah', trim($data['unit_pengolah'] ?? ''));
         $this->db->bind('status', $this->validStatus($data['status'] ?? '') ? $data['status'] : 'diterima');
@@ -85,8 +87,48 @@ class Suratmasuk_model
 
     public function updateDisposisi(int $id, array $data, array $files = [])
     {
+        $current = $this->getById($id);
+        if (!$current) {
+            return -1;
+        }
+
+        $role = currentRole();
+        if ($role === 'sekcam' && !in_array($current['status'], ['sekcam', 'instruksi_camat'], true)) {
+            return -1;
+        }
+
+        $statusBaru = $this->resolveStatus($role, $current['status'], $data['status'] ?? '');
+
+        $payload = [
+            'instruksi_camat'   => $current['instruksi_camat'],
+            'catatan_koreksi'   => $current['catatan_koreksi'],
+            'disposisi_sekcam'  => $current['disposisi_sekcam'],
+            'unit_pengolah'     => $current['unit_pengolah'],
+            'kode_klasifikasi'  => $current['kode_klasifikasi'],
+            'status'            => $statusBaru,
+        ];
+
+        if (in_array($role, ['camat', 'staf', 'admin'], true)) {
+            $payload['instruksi_camat'] = trim($data['instruksi_camat'] ?? $payload['instruksi_camat']);
+            $payload['kode_klasifikasi'] = trim($data['kode_klasifikasi'] ?? $payload['kode_klasifikasi']);
+        }
+
+        if ($role === 'camat') {
+            $payload['catatan_koreksi'] = trim($data['catatan_koreksi'] ?? $payload['catatan_koreksi']);
+        }
+
+        if (in_array($role, ['sekcam', 'staf', 'admin'], true)) {
+            $payload['disposisi_sekcam'] = trim($data['disposisi_sekcam'] ?? $payload['disposisi_sekcam']);
+            $payload['unit_pengolah'] = trim($data['unit_pengolah'] ?? $payload['unit_pengolah']);
+        }
+
+        if (in_array($role, ['staf', 'admin'], true) && isset($data['status']) && $this->validStatus($data['status'])) {
+            $payload['status'] = $data['status'];
+        }
+
         $query = "UPDATE {$this->table}
                   SET instruksi_camat = :instruksi_camat,
+                      catatan_koreksi = :catatan_koreksi,
                       disposisi_sekcam = :disposisi_sekcam,
                       unit_pengolah = :unit_pengolah,
                       status = :status,
@@ -94,11 +136,12 @@ class Suratmasuk_model
                   WHERE id = :id";
 
         $this->db->query($query);
-        $this->db->bind('instruksi_camat', trim($data['instruksi_camat'] ?? ''));
-        $this->db->bind('disposisi_sekcam', trim($data['disposisi_sekcam'] ?? ''));
-        $this->db->bind('unit_pengolah', trim($data['unit_pengolah'] ?? ''));
-        $this->db->bind('kode_klasifikasi', trim($data['kode_klasifikasi'] ?? ''));
-        $this->db->bind('status', $this->validStatus($data['status'] ?? '') ? $data['status'] : 'diterima');
+        $this->db->bind('instruksi_camat', $payload['instruksi_camat']);
+        $this->db->bind('catatan_koreksi', $payload['catatan_koreksi']);
+        $this->db->bind('disposisi_sekcam', $payload['disposisi_sekcam']);
+        $this->db->bind('unit_pengolah', $payload['unit_pengolah']);
+        $this->db->bind('kode_klasifikasi', $payload['kode_klasifikasi']);
+        $this->db->bind('status', $payload['status']);
         $this->db->bind('id', $id);
         $this->db->execute();
 
@@ -122,6 +165,19 @@ class Suratmasuk_model
             $map[$r['status']] = (int)$r['total'];
         }
         return $map;
+    }
+
+    public function terimaOlehUnit(int $id)
+    {
+        $current = $this->getById($id);
+        if (!$current || $current['status'] !== 'diproses_unit') {
+            return 0;
+        }
+
+        $this->db->query("UPDATE {$this->table} SET status = 'selesai' WHERE id = :id");
+        $this->db->bind('id', $id);
+        $this->db->execute();
+        return $this->db->rowCount();
     }
 
     private function simpanLampiran(int $idSurat, $files)
@@ -175,10 +231,32 @@ class Suratmasuk_model
         return date('Y-m-d');
     }
 
+    private function normalizeOptionalDate($raw)
+    {
+        if (empty($raw)) {
+            return null;
+        }
+        return $this->normalizeDate($raw);
+    }
+
     private function validStatus(string $status)
     {
-        $allowed = ['diterima', 'instruksi_camat', 'sekcam', 'distribusi_umpeg', 'diproses_unit', 'selesai'];
+        $allowed = ['diterima', 'instruksi_camat', 'koreksi', 'sekcam', 'distribusi_umpeg', 'diproses_unit', 'selesai'];
         return in_array($status, $allowed, true);
+    }
+
+    private function resolveStatus(string $role, string $currentStatus, string $submitted)
+    {
+        if ($role === 'camat') {
+            return in_array($submitted, ['instruksi_camat', 'koreksi', 'sekcam'], true) ? $submitted : 'instruksi_camat';
+        }
+        if ($role === 'sekcam') {
+            return 'distribusi_umpeg';
+        }
+        if ($role === 'unit') {
+            return $currentStatus === 'diproses_unit' ? 'selesai' : $currentStatus;
+        }
+        return $this->validStatus($submitted) ? $submitted : $currentStatus;
     }
 
     private function reArrayFiles($file_post)

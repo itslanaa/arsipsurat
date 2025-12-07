@@ -6,31 +6,42 @@
         </a>
     </div>
 
+    <?php $role = currentRole(); ?>
     <nav class="mt-6 flex-grow">
-        <a href="<?= BASE_URL; ?>/dashboard" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= ($judul == 'Dashboard') ? 'active-link' : ''; ?>">
-            <i class="fas fa-tachometer-alt fa-fw sidebar-icon mr-3"></i>
-            <span>Dashboard</span>
-        </a>
-        <a href="<?= BASE_URL; ?>/arsip" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Arsip')) ? 'active-link' : ''; ?>">
-            <i class="fas fa-archive fa-fw sidebar-icon mr-3"></i>
-            <span>Arsip Digital</span>
-        </a>
+        <?php if (!in_array($role, ['camat', 'sekcam', 'unit'], true)): ?>
+            <a href="<?= BASE_URL; ?>/dashboard" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= ($judul == 'Dashboard') ? 'active-link' : ''; ?>">
+                <i class="fas fa-tachometer-alt fa-fw sidebar-icon mr-3"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="<?= BASE_URL; ?>/arsip" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Arsip')) ? 'active-link' : ''; ?>">
+                <i class="fas fa-archive fa-fw sidebar-icon mr-3"></i>
+                <span>Arsip Digital</span>
+            </a>
+        <?php endif; ?>
         <a href="<?= BASE_URL; ?>/suratmasuk" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Surat Masuk')) ? 'active-link' : ''; ?>">
             <i class="fas fa-inbox fa-fw sidebar-icon mr-3"></i>
             <span>Surat Masuk</span>
         </a>
-        <a href="<?= BASE_URL; ?>/surat" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Surat')) ? 'active-link' : ''; ?>">
-            <i class="fas fa-file-signature fa-fw sidebar-icon mr-3"></i>
-            <span>Buat Surat</span>
-        </a>
-        <a href="<?= BASE_URL; ?>/kategori" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Kategori')) ? 'active-link' : ''; ?>">
-            <i class="fas fa-tags fa-fw sidebar-icon mr-3"></i>
-            <span>Kategori</span>
-        </a>
+        <?php if (!in_array($role, ['camat', 'sekcam', 'unit'], true)): ?>
+            <a href="<?= BASE_URL; ?>/surat" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Surat')) ? 'active-link' : ''; ?>">
+                <i class="fas fa-file-signature fa-fw sidebar-icon mr-3"></i>
+                <span>Buat Surat</span>
+            </a>
+            <a href="<?= BASE_URL; ?>/kategori" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Kategori')) ? 'active-link' : ''; ?>">
+                <i class="fas fa-tags fa-fw sidebar-icon mr-3"></i>
+                <span>Kategori</span>
+            </a>
             <a href="<?= BASE_URL; ?>/panduan" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Panduan')) ? 'active-link' : ''; ?>">
                 <i class="fas fa-info-circle fa-fw sidebar-icon mr-3"></i>
                 <span>Panduan</span>
             </a>
+            <?php if (in_array($role, ['staf', 'admin'], true)): ?>
+                <a href="<?= BASE_URL; ?>/user/kelola" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Pengguna')) ? 'active-link' : ''; ?>">
+                    <i class="fas fa-users-cog fa-fw sidebar-icon mr-3"></i>
+                    <span>Kelola User</span>
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
     </nav>
 
     <div class="p-6 border-t">

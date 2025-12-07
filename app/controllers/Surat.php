@@ -12,6 +12,11 @@ class Surat extends Controller
             header('Location: ' . BASE_URL . '/auth');
             exit;
         }
+
+        if (in_array(currentRole(), ['camat', 'sekcam', 'unit'], true)) {
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
     }
     // Menampilkan halaman pembuatan surat dengan live preview
     public function index()
