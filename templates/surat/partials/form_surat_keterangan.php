@@ -1,10 +1,5 @@
 <?php /* Form Surat Keterangan */ ?>
 <div class="mb-4">
-  <label for="noSurat" class="block text-sm font-medium text-gray-700 mb-1">Nomor Surat</label>
-  <input type="text" id="noSurat" name="noSurat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-</div>
-
-<div class="mb-4">
   <label for="tglSurat" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Surat</label>
   <input type="date" id="tglSurat" name="tglSurat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
 </div>

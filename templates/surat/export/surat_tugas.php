@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <title>Surat Tugas</title>
 <style>
-  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12pt; }
+  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12pt; line-height: 1.8; }
   .text-center { text-align:center; }
   .text-justify { text-align: justify; }
   .kop-table { width:100%; border-collapse:collapse; margin-bottom: 8px; }
@@ -48,7 +48,7 @@
     <tr>
       <td class="w-15" style="vertical-align:top;">Dasar</td>
       <td class="w-5"  style="vertical-align:top;">:</td>
-      <td class="w-80" style="vertical-align:top;"><?= $dasarSuratHtml ?></td>
+      <td class="w-80" style="vertical-align:top; white-space: pre-wrap;"><?= $dasarSuratPlain ?></td>
     </tr>
   </table>
 
@@ -59,18 +59,41 @@
       <td class="w-15" style="vertical-align:top;">Kepada</td>
       <td class="w-5"  style="vertical-align:top;">:</td>
       <td class="w-80" style="vertical-align:top;">
-        <table style="width:100%;">
-          <tr><td style="width:25%;">Nama</td><td>: <?= $pegawaiNama ?></td></tr>
-          <tr><td>Pangkat/gol</td><td>: <?= $pegawaiPangkat ?></td></tr>
-          <tr><td>NIP</td><td>: <?= $pegawaiNip ?></td></tr>
-          <tr><td>Jabatan</td><td>: <?= $pegawaiJabatan ?></td></tr>
-        </table>
+        <?php if (count($pegawaiList) <= 1): ?>
+          <?php $pg = $pegawaiList[0] ?? []; ?>
+          <table style="width:100%;">
+            <?php if (($pg['visible_nama'] ?? true) || !isset($pg['visible_nama'])): ?><tr><td style="width:25%;">Nama</td><td>: <?= $pg['nama'] ?? '' ?></td></tr><?php endif; ?>
+            <?php if (($pg['visible_pangkat'] ?? true) || !isset($pg['visible_pangkat'])): ?><tr><td>Pangkat/gol</td><td>: <?= $pg['pangkat'] ?? '' ?></td></tr><?php endif; ?>
+            <?php if (($pg['visible_nip'] ?? true) || !isset($pg['visible_nip'])): ?><tr><td>NIP</td><td>: <?= $pg['nip'] ?? '' ?></td></tr><?php endif; ?>
+            <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><tr><td>Jabatan</td><td>: <?= $pg['jabatan'] ?? '' ?></td></tr><?php endif; ?>
+          </table>
+        <?php else: ?>
+          <table style="width:100%; border-collapse:collapse;">
+            <?php foreach ($pegawaiList as $idx => $pg): ?>
+              <tr>
+                <td style="width:22px; vertical-align:top; padding:4px 6px 8px 0; font-weight:bold;"><?= $idx + 1 ?>.</td>
+                <td style="vertical-align:top; padding:4px 0 8px;">
+                  <?php if (($pg['visible_nama'] ?? true) || !isset($pg['visible_nama'])): ?>
+                    <div><strong><?= $pg['nama'] ?: '-' ?></strong></div>
+                  <?php endif; ?>
+                  <div style="padding-left:14px;">
+                    <?php if (($pg['visible_pangkat'] ?? true) || !isset($pg['visible_pangkat'])): ?><div>Pangkat/Gol : <?= $pg['pangkat'] ?? '' ?></div><?php endif; ?>
+                    <?php if (($pg['visible_nip'] ?? true) || !isset($pg['visible_nip'])): ?><div>NIP : <?= $pg['nip'] ?? '' ?></div><?php endif; ?>
+                    <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><div>Jabatan : <?= $pg['jabatan'] ?? '' ?></div><?php endif; ?>
+                  </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </table>
+        <?php endif; ?>
       </td>
     </tr>
     <tr>
       <td style="vertical-align:top;">Untuk</td>
       <td style="vertical-align:top;">:</td>
-      <td style="vertical-align:top;"><?= $tugasSuratHtml ?></td>
+      <td style="vertical-align:top; white-space: pre-wrap;">
+        <?= nl2br($tugasSuratPlain) ?>
+      </td>
     </tr>
   </table>
 
@@ -81,7 +104,7 @@
   <tr>
     <td style="width:60%;"></td> <!-- kosongkan kiri untuk “dorong” ke kanan -->
     <td style="width:40%; text-align:center; vertical-align:top;">
-      <p><?= $tglSuratFormatted ?></p>
+      <p>Cibungbulang, <?= $tglSuratFormatted ?></p>
       <p style="font-weight:bold;"><?= htmlspecialchars($pejabat['jabatan'] ?? ''); ?>,</p>
         <!-- spacer tanda tangan: gunakan mm + nbsp supaya mPDF tidak collapse -->
       <div style="height:22mm;">&nbsp;</div>
