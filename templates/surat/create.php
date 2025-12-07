@@ -11,11 +11,14 @@
   .preview-frame {
     background: #fff;
     max-width: 900px;
-    width: min(900px, 100%);
-    min-height: 1120px;
+    width: min(794px, 100%);
+    min-height: 1123px;
     margin: 0 auto;
-    padding: 32px 36px;
+    padding: 32px 40px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    font-family: 'DejaVu Sans', Arial, sans-serif;
+    font-size: 12pt;
+    line-height: 1.8;
   }
   .preview-zoomable {
     transform-origin: top center;
@@ -521,7 +524,8 @@
       listEl.innerHTML = '';
       data.forEach((row) => {
         const li = document.createElement('li');
-        li.className = 'mb-3';
+        li.style.marginBottom = '8px';
+        li.style.lineHeight = '1.8';
         const lines = [];
         if (row.visible_nama !== false) {
           lines.push(`<div><strong>${row.nama || '-'}</strong></div>`);
@@ -530,7 +534,7 @@
         if (row.visible_pangkat !== false) sub.push(`<div>Pangkat/Gol : ${row.pangkat || '-'}</div>`);
         if (row.visible_nip !== false) sub.push(`<div>NIP : ${row.nip || '-'}</div>`);
         if (row.visible_jabatan !== false) sub.push(`<div>Jabatan : ${row.jabatan || '-'}</div>`);
-        if (sub.length) lines.push(`<div style="padding-left:18px;">${sub.join('')}</div>`);
+        if (sub.length) lines.push(`<div style="padding-left:14px;">${sub.join('')}</div>`);
         if (!lines.length) lines.push('<div>-</div>');
         li.innerHTML = lines.join('');
         listEl.appendChild(li);
