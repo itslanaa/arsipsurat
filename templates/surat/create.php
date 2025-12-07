@@ -98,8 +98,18 @@
       <div id="form-container">
         <?php include __DIR__ . '/partials/form_surat_tugas.php'; ?>
       </div>
-      <div class="flex justify-end gap-3 mt-4">
-        <button type="button" id="btnExportPDF" class="bg-green-600 text-white px-4 py-2 rounded">Download PDF</button>
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4">
+        <div class="w-full md:w-1/2">
+          <label for="signatureOption" class="block text-sm font-medium text-gray-700 mb-1">Pilihan Tanda Tangan</label>
+          <select id="signatureOption" name="signature_option" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            <option value="with">Tampilkan gambar tanda tangan</option>
+            <option value="without">Kosong (tanpa gambar)</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Pengaturan ini berlaku untuk pratinjau dan file PDF/DOC yang diekspor.</p>
+        </div>
+        <div class="flex justify-end gap-3 w-full md:w-auto">
+          <button type="button" id="btnExportPDF" class="bg-green-600 text-white px-4 py-2 rounded">Download PDF</button>
+        </div>
       </div>
     </form>
   </div>
@@ -218,6 +228,7 @@
   const previewZoom = document.getElementById('previewZoom');
   const previewZoomValue = document.getElementById('previewZoomValue');
   const previewZoomTarget = document.getElementById('preview-container');
+  const signatureOption = document.getElementById('signatureOption');
 
   function composeNomorSurat() {
     const kode = (kodeKlasifikasiInput?.value || '').trim();
@@ -398,6 +409,8 @@
     if (template === 'tugas') {
       renderPegawaiPreview();
     }
+
+    updateSignaturePreview();
   }
 
   /* switch partial form + preview via AJAX */
@@ -575,8 +588,22 @@
     renderPegawaiPreview();
   }
 
+  function updateSignaturePreview() {
+    const wrap = document.getElementById('preview-ttd-wrap');
+    const img = document.getElementById('preview-ttd-img');
+    if (!wrap || !img) return;
+
+    const show = signatureOption ? signatureOption.value !== 'without' : true;
+    img.style.display = show ? 'block' : 'none';
+  }
+
+  if (signatureOption) {
+    signatureOption.addEventListener('change', updateSignaturePreview);
+  }
+
   attachLivePreview('tugas');
   updatePreviewFromForm('tugas');
   initPegawaiRepeater();
   composeNomorSurat();
+  updateSignaturePreview();
 </script>

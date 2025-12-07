@@ -187,6 +187,8 @@ class Surat extends Controller
 
         // Asset
         $logoUrl = BASE_URL . '/assets/img/logo.png';
+        $ttdImgUrl = BASE_URL . '/assets/img/ttd.png';
+        $showSignature = ($post['signature_option'] ?? 'with') !== 'without';
 
         // --- 6) Tentukan file export (server-side HTML)
         $exportTemplate = "../templates/surat/export/surat_{$kode}.php";

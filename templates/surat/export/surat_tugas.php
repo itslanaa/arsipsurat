@@ -107,7 +107,11 @@
       <p>Cibungbulang, <?= $tglSuratFormatted ?></p>
       <p style="font-weight:bold;"><?= htmlspecialchars($pejabat['jabatan'] ?? ''); ?>,</p>
         <!-- spacer tanda tangan: gunakan mm + nbsp supaya mPDF tidak collapse -->
-      <div style="height:28mm;">&nbsp;</div>
+      <div style="height:28mm; display:flex; align-items:flex-start; justify-content:center;">
+        <?php if (!empty($showSignature)): ?>
+          <img src="<?= $ttdImgUrl ?>" alt="Tanda Tangan" style="height:100%; object-fit:contain;">
+        <?php else: ?>&nbsp;<?php endif; ?>
+      </div>
       <p style="font-weight:bold; text-decoration:underline;"><?= htmlspecialchars($pejabat['nama_lengkap'] ?? ''); ?></p>
       <p><?= htmlspecialchars($pejabat['pangkat_gol'] ?? ''); ?></p>
       <p>NIP. <?= htmlspecialchars($pejabat['nip'] ?? ''); ?></p>
