@@ -522,22 +522,19 @@
       singleWrap.classList.add('hidden');
       multiWrap.classList.remove('hidden');
       listEl.innerHTML = '';
-      data.forEach((row) => {
-        const li = document.createElement('li');
-        li.style.marginBottom = '8px';
-        li.style.lineHeight = '1.8';
-        const lines = [];
-        if (row.visible_nama !== false) {
-          lines.push(`<div><strong>${row.nama || '-'}</strong></div>`);
-        }
-        const sub = [];
-        if (row.visible_pangkat !== false) sub.push(`<div>Pangkat/Gol : ${row.pangkat || '-'}</div>`);
-        if (row.visible_nip !== false) sub.push(`<div>NIP : ${row.nip || '-'}</div>`);
-        if (row.visible_jabatan !== false) sub.push(`<div>Jabatan : ${row.jabatan || '-'}</div>`);
-        if (sub.length) lines.push(`<div style="padding-left:14px;">${sub.join('')}</div>`);
-        if (!lines.length) lines.push('<div>-</div>');
-        li.innerHTML = lines.join('');
-        listEl.appendChild(li);
+      data.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="width:22px; vertical-align:top; padding:4px 6px 8px 0;">${idx + 1}.</td>
+          <td style="vertical-align:top; padding:4px 0 8px;">
+            ${row.visible_nama !== false ? `<div><strong>${row.nama || '-'}</strong></div>` : ''}
+            <div style="padding-left:14px;">
+              ${row.visible_pangkat !== false ? `<div>Pangkat/Gol : ${row.pangkat || '-'}</div>` : ''}
+              ${row.visible_nip !== false ? `<div>NIP : ${row.nip || '-'}</div>` : ''}
+              ${row.visible_jabatan !== false ? `<div>Jabatan : ${row.jabatan || '-'}</div>` : ''}
+            </div>
+          </td>`;
+        listEl.appendChild(tr);
       });
     }
   }

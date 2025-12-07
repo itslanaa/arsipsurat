@@ -68,20 +68,23 @@
             <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><tr><td>Jabatan</td><td>: <?= $pg['jabatan'] ?? '' ?></td></tr><?php endif; ?>
           </table>
         <?php else: ?>
-          <ol style="margin:0; padding-left: 18px;">
-            <?php foreach ($pegawaiList as $pg): ?>
-              <li style="margin-bottom:8px;">
-                <?php if (($pg['visible_nama'] ?? true) || !isset($pg['visible_nama'])): ?>
-                  <div><strong><?= $pg['nama'] ?: '-' ?></strong></div>
-                <?php endif; ?>
-                <div style="padding-left:14px;">
-                  <?php if (($pg['visible_pangkat'] ?? true) || !isset($pg['visible_pangkat'])): ?><div>Pangkat/Gol : <?= $pg['pangkat'] ?? '' ?></div><?php endif; ?>
-                  <?php if (($pg['visible_nip'] ?? true) || !isset($pg['visible_nip'])): ?><div>NIP : <?= $pg['nip'] ?? '' ?></div><?php endif; ?>
-                  <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><div>Jabatan : <?= $pg['jabatan'] ?? '' ?></div><?php endif; ?>
-                </div>
-              </li>
+          <table style="width:100%; border-collapse:collapse;">
+            <?php foreach ($pegawaiList as $idx => $pg): ?>
+              <tr>
+                <td style="width:22px; vertical-align:top; padding:4px 6px 8px 0; font-weight:bold;"><?= $idx + 1 ?>.</td>
+                <td style="vertical-align:top; padding:4px 0 8px;">
+                  <?php if (($pg['visible_nama'] ?? true) || !isset($pg['visible_nama'])): ?>
+                    <div><strong><?= $pg['nama'] ?: '-' ?></strong></div>
+                  <?php endif; ?>
+                  <div style="padding-left:14px;">
+                    <?php if (($pg['visible_pangkat'] ?? true) || !isset($pg['visible_pangkat'])): ?><div>Pangkat/Gol : <?= $pg['pangkat'] ?? '' ?></div><?php endif; ?>
+                    <?php if (($pg['visible_nip'] ?? true) || !isset($pg['visible_nip'])): ?><div>NIP : <?= $pg['nip'] ?? '' ?></div><?php endif; ?>
+                    <?php if (($pg['visible_jabatan'] ?? true) || !isset($pg['visible_jabatan'])): ?><div>Jabatan : <?= $pg['jabatan'] ?? '' ?></div><?php endif; ?>
+                  </div>
+                </td>
+              </tr>
             <?php endforeach; ?>
-          </ol>
+          </table>
         <?php endif; ?>
       </td>
     </tr>
@@ -101,7 +104,7 @@
   <tr>
     <td style="width:60%;"></td> <!-- kosongkan kiri untuk “dorong” ke kanan -->
     <td style="width:40%; text-align:center; vertical-align:top;">
-      <p><?= $tglSuratFormatted ?></p>
+      <p>Cibungbulang, <?= $tglSuratFormatted ?></p>
       <p style="font-weight:bold;"><?= htmlspecialchars($pejabat['jabatan'] ?? ''); ?>,</p>
         <!-- spacer tanda tangan: gunakan mm + nbsp supaya mPDF tidak collapse -->
       <div style="height:22mm;">&nbsp;</div>
