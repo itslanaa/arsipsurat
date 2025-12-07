@@ -39,10 +39,10 @@ class Surat_model
         $this->db->query("
     INSERT INTO surat_keluar
     (id_template, nomor_surat, tanggal_surat, perihal, data_surat,
-     id_user_pembuat, nama_file_pdf, path_file, created_at)
+     id_user_pembuat, nama_file_pdf, path_file, kode_klasifikasi, id_surat_masuk, created_at)
     VALUES
     (:id_template, :nomor_surat, :tanggal_surat, :perihal, :data_surat,
-     :id_user_pembuat, :nama_file_pdf, :path_file, NOW())
+     :id_user_pembuat, :nama_file_pdf, :path_file, :kode_klasifikasi, :id_surat_masuk, NOW())
   ");
         $this->db->bind('id_template',     $p['id_template']);
         $this->db->bind('nomor_surat',     $p['nomor_surat']);
@@ -52,6 +52,8 @@ class Surat_model
         $this->db->bind('id_user_pembuat', $p['id_user_pembuat']);
         $this->db->bind('nama_file_pdf',   $p['nama_file_pdf']);
         $this->db->bind('path_file',       $p['path_file']);
+        $this->db->bind('kode_klasifikasi', $p['kode_klasifikasi'] ?? null);
+        $this->db->bind('id_surat_masuk', $p['id_surat_masuk'] ?? null);
         $this->db->execute();
         return $this->db->lastInsertId();
     }

@@ -29,7 +29,7 @@
       <tr>
         <td class="align-top" style="width: 15%;">Dasar</td>
         <td class="align-top" style="width: 5%;">:</td>
-        <td class="align-top" id="preview-dasar" style="width: 80%;"></td>
+        <td class="align-top" id="preview-dasar" style="width: 80%; white-space: pre-wrap;"></td>
       </tr>
     </tbody>
   </table>
@@ -42,18 +42,23 @@
         <td class="align-top" style="width: 15%;">Kepada</td>
         <td class="align-top" style="width: 5%;">:</td>
         <td class="align-top" style="width: 80%;">
-          <table class="w-full">
-            <tr><td style="width: 25%;">Nama</td><td>: <span id="preview-pegawaiNama"></span></td></tr>
-            <tr><td>Pangkat/gol</td><td>: <span id="preview-pegawaiPangkat"></span></td></tr>
-            <tr><td>NIP</td><td>: <span id="preview-pegawaiNip"></span></td></tr>
-            <tr><td>Jabatan</td><td>: <span id="preview-pegawaiJabatan"></span></td></tr>
-          </table>
+          <div id="preview-pegawai-single">
+            <table class="w-full">
+              <tr><td style="width: 25%;">Nama</td><td>: <span id="preview-pegawaiNama"></span></td></tr>
+              <tr><td>Pangkat/gol</td><td>: <span id="preview-pegawaiPangkat"></span></td></tr>
+              <tr><td>NIP</td><td>: <span id="preview-pegawaiNip"></span></td></tr>
+              <tr><td>Jabatan</td><td>: <span id="preview-pegawaiJabatan"></span></td></tr>
+            </table>
+          </div>
+          <div id="preview-pegawai-multi" class="hidden">
+            <ol class="list-decimal ml-6" id="preview-pegawai-list"></ol>
+          </div>
         </td>
       </tr>
       <tr>
         <td class="align-top">Untuk</td>
         <td class="align-top">:</td>
-        <td class="align-top" id="preview-tugas"></td>
+        <td class="align-top" id="preview-tugas" style="white-space: pre-wrap;"></td>
       </tr>
     </tbody>
   </table>

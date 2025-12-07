@@ -41,10 +41,10 @@ class Dashboard_model {
     public function getArsipDistribution()
     {
         $this->db->query("
-            SELECT k.nama_kategori, COUNT(a.id) as jumlah
+            SELECT CONCAT(k.kode, ' - ', k.nama_kategori) AS nama_kategori, COUNT(a.id) as jumlah
             FROM kategori_arsip k
             LEFT JOIN arsip a ON k.id = a.id_kategori
-            GROUP BY k.nama_kategori
+            GROUP BY k.id
             ORDER BY jumlah DESC
         ");
         return $this->db->resultSet();
@@ -52,6 +52,12 @@ class Dashboard_model {
 
     public function getTotalSurat() {
         $this->db->query("SELECT COUNT(*) AS total FROM surat_keluar");
+        $row = $this->db->single();
+        return (int)($row['total'] ?? 0);
+    }
+
+    public function getTotalSuratMasuk() {
+        $this->db->query("SELECT COUNT(*) AS total FROM surat_masuk");
         $row = $this->db->single();
         return (int)($row['total'] ?? 0);
     }
@@ -79,6 +85,11 @@ class Dashboard_model {
             GROUP BY sk.id_template
             ORDER BY jml DESC
         ");
+        return $this->db->resultSet();
+    }
+
+    public function getSuratMasukByStatus() {
+        $this->db->query("SELECT status, COUNT(*) AS jml FROM surat_masuk GROUP BY status");
         return $this->db->resultSet();
     }
 }
