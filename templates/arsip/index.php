@@ -18,7 +18,7 @@
             <select id="kategoriFilter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                 <option value="">Semua Kategori</option>
                 <?php foreach ($kategori as $kat) : ?>
-                    <option value="<?= htmlspecialchars($kat['id']); ?>"><?= htmlspecialchars($kat['nama_kategori']); ?></option>
+                    <option value="<?= htmlspecialchars($kat['id']); ?>"><?= htmlspecialchars($kat['kode'] . ' - ' . $kat['nama_kategori']); ?></option>
                 <?php endforeach; ?>
             </select>
         </div>

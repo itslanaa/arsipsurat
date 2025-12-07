@@ -11,7 +11,7 @@ class Kategori_model {
 
     public function getAllKategori()
     {
-        $this->db->query('SELECT * FROM ' . $this->table . ' ORDER BY nama_kategori ASC');
+        $this->db->query('SELECT * FROM ' . $this->table . ' ORDER BY kode ASC');
         return $this->db->resultSet();
     }
 
@@ -29,21 +29,36 @@ class Kategori_model {
         return $this->db->single();
     }
 
-    public function getOrCreateByNama($nama)
+    public function getKategoriByKode($kode)
     {
-        $existing = $this->getKategoriByNama($nama);
+        $this->db->query('SELECT * FROM ' . $this->table . ' WHERE kode = :kode LIMIT 1');
+        $this->db->bind('kode', $kode);
+        return $this->db->single();
+    }
+
+    public function getOrCreateByKode($kode, $nama = '')
+    {
+        if (!$kode) {
+            return 0;
+        }
+        $existing = $this->getKategoriByKode($kode);
         if ($existing && isset($existing['id'])) {
             return (int)$existing['id'];
         }
-        $this->tambahDataKategori(['nama_kategori' => $nama]);
-        $created = $this->getKategoriByNama($nama);
+        $payload = [
+            'kode' => $kode,
+            'nama_kategori' => $nama ?: $kode,
+        ];
+        $this->tambahDataKategori($payload);
+        $created = $this->getKategoriByKode($kode);
         return (int)($created['id'] ?? 0);
     }
 
     public function tambahDataKategori($data)
     {
-        $query = "INSERT INTO " . $this->table . " (nama_kategori) VALUES (:nama_kategori)";
+        $query = "INSERT INTO " . $this->table . " (kode, nama_kategori) VALUES (:kode, :nama_kategori)";
         $this->db->query($query);
+        $this->db->bind('kode', $data['kode']);
         $this->db->bind('nama_kategori', $data['nama_kategori']);
         $this->db->execute();
         return $this->db->rowCount();
@@ -60,8 +75,9 @@ class Kategori_model {
 
     public function ubahDataKategori($data)
     {
-        $query = "UPDATE " . $this->table . " SET nama_kategori = :nama_kategori WHERE id = :id";
+        $query = "UPDATE " . $this->table . " SET kode = :kode, nama_kategori = :nama_kategori WHERE id = :id";
         $this->db->query($query);
+        $this->db->bind('kode', $data['kode']);
         $this->db->bind('nama_kategori', $data['nama_kategori']);
         $this->db->bind('id', $data['id']);
         $this->db->execute();

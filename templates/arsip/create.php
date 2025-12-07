@@ -12,7 +12,7 @@
             <select id="id_kategori" name="id_kategori" class="block w-full rounded-md border-gray-300 shadow-sm" required>
                 <option value="">-- Pilih Kategori --</option>
                 <?php foreach ($kategori as $kat) : ?>
-                    <option value="<?= $kat['id']; ?>"><?= htmlspecialchars($kat['nama_kategori']); ?></option>
+                    <option value="<?= $kat['id']; ?>"><?= htmlspecialchars($kat['kode'] . ' - ' . $kat['nama_kategori']); ?></option>
                 <?php endforeach; ?>
             </select>
         </div>

@@ -13,10 +13,12 @@ class Suratmasuk extends Controller
     public function index()
     {
         $model = $this->model('Suratmasuk_model');
+        $kategoriModel = $this->model('Kategori_model');
         $data['judul'] = 'Surat Masuk & Disposisi';
         $data['daftar_surat'] = $model->getAll(100);
         $data['status_count'] = $model->countByStatus();
         $data['total_surat_masuk'] = $model->countTotal();
+        $data['kategori_arsip'] = $kategoriModel->getAllKategori();
 
         $this->view('layouts/header', $data);
         $this->view('layouts/sidebar', $data);
@@ -27,6 +29,7 @@ class Suratmasuk extends Controller
     public function create()
     {
         $data['judul'] = 'Input Surat Masuk';
+        $data['kategori_arsip'] = $this->model('Kategori_model')->getAllKategori();
         $this->view('layouts/header', $data);
         $this->view('layouts/sidebar', $data);
         $this->view('surat_masuk/create', $data);
@@ -82,9 +85,15 @@ class Suratmasuk extends Controller
             exit;
         }
 
-        $kategoriNama = $this->kategoriArsipDariKode($surat['kode_klasifikasi'] ?? '');
         $kategoriModel = $this->model('Kategori_model');
-        $idKategori = $kategoriModel->getOrCreateByNama($kategoriNama);
+        $kategoriInfo = $this->kategoriArsipDariKode($surat['kode_klasifikasi'] ?? '', $kategoriModel);
+        $idKategori = $kategoriInfo['id'];
+        if (!$idKategori) {
+            Flasher::setFlash('Arsip', 'Kode klasifikasi belum terdaftar sebagai kategori arsip.', 'error');
+            header('Location: ' . BASE_URL . '/suratmasuk');
+            exit;
+        }
+
         $lampiran = $model->getFilesBySurat((int)$id);
 
         $arsipId = $this->model('Arsip_model')->tambahArsipDariSuratMasuk($surat, $idKategori, $lampiran);
@@ -97,13 +106,25 @@ class Suratmasuk extends Controller
         exit;
     }
 
-    private function kategoriArsipDariKode(string $kode)
+    private function kategoriArsipDariKode(string $kode, Kategori_model $kategoriModel)
     {
-        $map = [
-            '800.1' => '800.1 - Sumber Daya Manusia',
-            '800.2' => '800.2 - Pendidikan dan Pelatihan',
-            '400.14' => '400.14 - Hubungan Masyarakat',
+        if (!$kode) {
+            return ['id' => 0, 'kode' => '', 'nama' => ''];
+        }
+
+        $existing = $kategoriModel->getKategoriByKode($kode);
+        if ($existing) {
+            return ['id' => (int)$existing['id'], 'kode' => $existing['kode'], 'nama' => $existing['nama_kategori']];
+        }
+
+        $mapNama = [
+            '800.1' => 'Sumber Daya Manusia',
+            '800.2' => 'Pendidikan dan Pelatihan',
+            '400.14' => 'Hubungan Masyarakat',
         ];
-        return $map[$kode] ?? 'Surat Masuk';
+        $nama = $mapNama[$kode] ?? $kode;
+        $createdId = $kategoriModel->getOrCreateByKode($kode, $nama);
+
+        return ['id' => $createdId, 'kode' => $kode, 'nama' => $nama];
     }
 }

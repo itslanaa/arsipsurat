@@ -27,6 +27,12 @@ $statusClasses = [
         </div>
     </div>
 
+    <datalist id="kodeKlasifikasiList">
+        <?php foreach (($kategori_arsip ?? []) as $kat): ?>
+            <option value="<?= htmlspecialchars($kat['kode']); ?>" label="<?= htmlspecialchars($kat['nama_kategori']); ?>"></option>
+        <?php endforeach; ?>
+    </datalist>
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="p-4 rounded-lg border">
             <p class="text-sm text-gray-500">Total surat masuk</p>
@@ -104,7 +110,7 @@ $statusClasses = [
                                     <textarea name="instruksi_camat" rows="2" class="w-full border rounded-md p-2" placeholder="Instruksi Camat"><?= htmlspecialchars($item['instruksi_camat'] ?? ''); ?></textarea>
                                     <textarea name="disposisi_sekcam" rows="2" class="w-full border rounded-md p-2" placeholder="Disposisi Sekcam"><?= htmlspecialchars($item['disposisi_sekcam'] ?? ''); ?></textarea>
                                     <input type="text" name="unit_pengolah" value="<?= htmlspecialchars($item['unit_pengolah'] ?? ''); ?>" class="w-full border rounded-md p-2" placeholder="Unit pengolah">
-                                    <input type="text" name="kode_klasifikasi" value="<?= htmlspecialchars($item['kode_klasifikasi'] ?? ''); ?>" class="w-full border rounded-md p-2" placeholder="Kode klasifikasi">
+                                    <input type="text" name="kode_klasifikasi" list="kodeKlasifikasiList" value="<?= htmlspecialchars($item['kode_klasifikasi'] ?? ''); ?>" class="w-full border rounded-md p-2" placeholder="Kode klasifikasi">
                                     <select name="status" class="w-full border rounded-md p-2">
                                         <?php foreach ($statusLabels as $k => $label): ?>
                                             <option value="<?= $k; ?>" <?= ($item['status'] === $k) ? 'selected' : ''; ?>><?= $label; ?></option>
