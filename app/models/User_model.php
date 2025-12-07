@@ -23,6 +23,12 @@ class User_model {
         return $this->db->single();
     }
 
+    public function getAll()
+    {
+        $this->db->query('SELECT * FROM ' . $this->table . ' ORDER BY id ASC');
+        return $this->db->resultSet();
+    }
+
     public function logLoginAttempt($userId, $status)
     {
         $ip = $_SERVER['REMOTE_ADDR'];
@@ -35,6 +41,56 @@ class User_model {
         $this->db->bind('ua', $userAgent);
         $this->db->bind('status', $status);
         $this->db->execute();
+    }
+
+    public function createUser(array $data)
+    {
+        if (($data['password_baru'] ?? '') === '' || ($data['password_baru'] !== ($data['konfirmasi_password'] ?? ''))) {
+            Flasher::setFlash('Password', 'konfirmasi tidak sesuai', 'error');
+            return 0;
+        }
+
+        $hash = password_hash($data['password_baru'], PASSWORD_DEFAULT);
+        $this->db->query("INSERT INTO {$this->table} (nama_lengkap, username, password, role) VALUES (:nama, :username, :pass, :role)");
+        $this->db->bind('nama', trim($data['nama_lengkap'] ?? ''));
+        $this->db->bind('username', trim($data['username'] ?? ''));
+        $this->db->bind('pass', $hash);
+        $this->db->bind('role', $data['role'] ?? 'staf');
+        $this->db->execute();
+        return $this->db->rowCount();
+    }
+
+    public function updateUser(array $data)
+    {
+        $this->db->query("UPDATE {$this->table} SET nama_lengkap = :nama, username = :username, role = :role WHERE id = :id");
+        $this->db->bind('nama', trim($data['nama_lengkap'] ?? ''));
+        $this->db->bind('username', trim($data['username'] ?? ''));
+        $this->db->bind('role', $data['role'] ?? 'staf');
+        $this->db->bind('id', (int)($data['id'] ?? 0));
+        $this->db->execute();
+        return $this->db->rowCount();
+    }
+
+    public function updatePasswordByAdmin(array $data)
+    {
+        if (($data['password_baru'] ?? '') === '' || ($data['password_baru'] !== ($data['konfirmasi_password'] ?? ''))) {
+            Flasher::setFlash('Password', 'konfirmasi tidak sesuai', 'error');
+            return 0;
+        }
+        $hash = password_hash($data['password_baru'], PASSWORD_DEFAULT);
+        $this->db->query("UPDATE {$this->table} SET password = :pass WHERE id = :id");
+        $this->db->bind('pass', $hash);
+        $this->db->bind('id', (int)$data['id']);
+        $this->db->execute();
+        return $this->db->rowCount();
+    }
+
+    public function deleteUser(int $id)
+    {
+        $this->db->query("DELETE FROM {$this->table} WHERE id = :id");
+        $this->db->bind('id', $id);
+        $this->db->execute();
+        return $this->db->rowCount();
     }
 
     public function getLoginHistory($userId)
