@@ -84,6 +84,7 @@ INSERT INTO `arsip_files` (`id`, `id_arsip`, `nama_file_asli`, `nama_file_unik`,
 
 CREATE TABLE `kategori_arsip` (
   `id` int NOT NULL,
+  `kode` varchar(20) NOT NULL,
   `nama_kategori` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -91,10 +92,10 @@ CREATE TABLE `kategori_arsip` (
 -- Dumping data for table `kategori_arsip`
 --
 
-INSERT INTO `kategori_arsip` (`id`, `nama_kategori`) VALUES
-(1, '800.1 - Sumber Daya Manusia'),
-(2, '800.2 - Pendidikan dan Pelatihan'),
-(3, '400.14 - Hubungan Masyarakat');
+INSERT INTO `kategori_arsip` (`id`, `kode`, `nama_kategori`) VALUES
+(1, '800.1', 'Sumber Daya Manusia'),
+(2, '800.2', 'Pendidikan dan Pelatihan'),
+(3, '400.14', 'Hubungan Masyarakat');
 
 -- --------------------------------------------------------
 
@@ -330,7 +331,8 @@ ALTER TABLE `arsip_files`
 -- Indexes for table `kategori_arsip`
 --
 ALTER TABLE `kategori_arsip`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `kode` (`kode`);
 
 --
 -- Indexes for table `login_history`

@@ -14,7 +14,7 @@ class Arsip_model {
     public function getAllArsip()
     {
         $this->db->query("
-            SELECT a.*, k.nama_kategori,
+            SELECT a.*, k.kode AS kode_kategori, CONCAT(k.kode, ' - ', k.nama_kategori) AS nama_kategori,
             (SELECT COUNT(*) FROM {$this->files_table} WHERE id_arsip = a.id) as jumlah_file
             FROM {$this->table} a
             JOIN kategori_arsip k ON a.id_kategori = k.id
@@ -320,10 +320,10 @@ class Arsip_model {
         $tanggal_mulai = $data['tanggal_mulai'] ?? '';
         $tanggal_akhir = $data['tanggal_akhir'] ?? '';
 
-        $query = "SELECT a.*, k.nama_kategori, 
+        $query = "SELECT a.*, k.kode AS kode_kategori, CONCAT(k.kode, ' - ', k.nama_kategori) AS nama_kategori,
                   (SELECT COUNT(*) FROM {$this->files_table} WHERE id_arsip = a.id) as jumlah_file
                   FROM {$this->table} a
-                  JOIN kategori_arsip k ON a.id_kategori = k.id 
+                  JOIN kategori_arsip k ON a.id_kategori = k.id
                   WHERE a.judul LIKE :keyword";
 
         if (!empty($kategori)) {

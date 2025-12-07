@@ -26,8 +26,13 @@
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Kode Klasifikasi</label>
-            <input type="text" name="kode_klasifikasi" required class="mt-1 w-full border rounded-md p-2" placeholder="800.1 / 900 dst">
-            <p class="text-xs text-gray-500 mt-1">Gunakan kode klasifikasi pemerintah (dipakai ulang untuk penomoran & pengarsipan).</p>
+            <input type="text" name="kode_klasifikasi" list="kodeKlasifikasiList" required class="mt-1 w-full border rounded-md p-2" placeholder="800.1 / 900 dst">
+            <datalist id="kodeKlasifikasiList">
+                <?php foreach (($kategori_arsip ?? []) as $kat): ?>
+                    <option value="<?= htmlspecialchars($kat['kode']); ?>" label="<?= htmlspecialchars($kat['nama_kategori']); ?>"></option>
+                <?php endforeach; ?>
+            </datalist>
+            <p class="text-xs text-gray-500 mt-1">Pilih kode yang tersedia atau ketik manual untuk menambahkan klasifikasi baru.</p>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Unit Pengolah (opsional)</label>

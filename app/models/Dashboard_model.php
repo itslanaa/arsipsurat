@@ -41,10 +41,10 @@ class Dashboard_model {
     public function getArsipDistribution()
     {
         $this->db->query("
-            SELECT k.nama_kategori, COUNT(a.id) as jumlah
+            SELECT CONCAT(k.kode, ' - ', k.nama_kategori) AS nama_kategori, COUNT(a.id) as jumlah
             FROM kategori_arsip k
             LEFT JOIN arsip a ON k.id = a.id_kategori
-            GROUP BY k.nama_kategori
+            GROUP BY k.id
             ORDER BY jumlah DESC
         ");
         return $this->db->resultSet();
