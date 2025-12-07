@@ -133,12 +133,37 @@ class Surat extends Controller
         }
 
         // Surat Tugas
-        $dasarSuratHtml    = $nl2p($post['dasarSurat'] ?? '');
-        $pegawaiNama       = $e($post['pegawaiNama'] ?? '');
-        $pegawaiPangkat    = $e($post['pegawaiPangkat'] ?? '');
-        $pegawaiNip        = $e($post['pegawaiNip'] ?? '');
-        $pegawaiJabatan    = $e($post['pegawaiJabatan'] ?? '');
-        $tugasSuratHtml    = $nl2p($post['tugasSurat'] ?? '');
+        $dasarSuratPlain   = $e($post['dasarSurat'] ?? '');
+        $tugasSuratPlain   = $e($post['tugasSurat'] ?? '');
+
+        $pegawaiList = [];
+        if (!empty($post['pegawai']) && is_array($post['pegawai'])) {
+            $arr = $post['pegawai'];
+            $max = 0;
+            foreach (['nama', 'pangkat', 'nip', 'jabatan'] as $k) {
+                $max = max($max, isset($arr[$k]) && is_array($arr[$k]) ? count($arr[$k]) : 0);
+            }
+            for ($i = 0; $i < $max; $i++) {
+                $pegawaiList[] = [
+                    'nama'    => $e($arr['nama'][$i] ?? ''),
+                    'pangkat' => $e($arr['pangkat'][$i] ?? ''),
+                    'nip'     => $e($arr['nip'][$i] ?? ''),
+                    'jabatan' => $e($arr['jabatan'][$i] ?? ''),
+                ];
+            }
+        } else {
+            $pegawaiList[] = [
+                'nama'    => $e($post['pegawaiNama'] ?? ''),
+                'pangkat' => $e($post['pegawaiPangkat'] ?? ''),
+                'nip'     => $e($post['pegawaiNip'] ?? ''),
+                'jabatan' => $e($post['pegawaiJabatan'] ?? ''),
+            ];
+        }
+
+        // fallback entry kosong agar tidak undefined
+        if (empty($pegawaiList)) {
+            $pegawaiList[] = ['nama' => '', 'pangkat' => '', 'nip' => '', 'jabatan' => ''];
+        }
 
         // Surat Keterangan
         $namaPenduduk      = $e($post['namaPenduduk'] ?? '');
@@ -174,7 +199,7 @@ class Surat extends Controller
 
         // Perihal untuk list
         $perihal = ($kode === 'tugas')
-            ? 'Surat Tugas - ' . ($pegawaiNama ?: '-')
+            ? 'Surat Tugas - ' . (implode(', ', array_filter(array_column($pegawaiList, 'nama'))) ?: '-')
             : 'Surat Keterangan - ' . ($namaPenduduk ?: '-');
 
         // --- 9) Generate & simpan + insert DB + download

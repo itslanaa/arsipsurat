@@ -48,7 +48,7 @@
     <tr>
       <td class="w-15" style="vertical-align:top;">Dasar</td>
       <td class="w-5"  style="vertical-align:top;">:</td>
-      <td class="w-80" style="vertical-align:top;"><?= $dasarSuratHtml ?></td>
+      <td class="w-80" style="vertical-align:top; white-space: pre-wrap;"><?= $dasarSuratPlain ?></td>
     </tr>
   </table>
 
@@ -59,18 +59,35 @@
       <td class="w-15" style="vertical-align:top;">Kepada</td>
       <td class="w-5"  style="vertical-align:top;">:</td>
       <td class="w-80" style="vertical-align:top;">
-        <table style="width:100%;">
-          <tr><td style="width:25%;">Nama</td><td>: <?= $pegawaiNama ?></td></tr>
-          <tr><td>Pangkat/gol</td><td>: <?= $pegawaiPangkat ?></td></tr>
-          <tr><td>NIP</td><td>: <?= $pegawaiNip ?></td></tr>
-          <tr><td>Jabatan</td><td>: <?= $pegawaiJabatan ?></td></tr>
-        </table>
+        <?php if (count($pegawaiList) <= 1): ?>
+          <table style="width:100%;">
+            <tr><td style="width:25%;">Nama</td><td>: <?= $pegawaiList[0]['nama'] ?? '' ?></td></tr>
+            <tr><td>Pangkat/gol</td><td>: <?= $pegawaiList[0]['pangkat'] ?? '' ?></td></tr>
+            <tr><td>NIP</td><td>: <?= $pegawaiList[0]['nip'] ?? '' ?></td></tr>
+            <tr><td>Jabatan</td><td>: <?= $pegawaiList[0]['jabatan'] ?? '' ?></td></tr>
+          </table>
+        <?php else: ?>
+          <ol style="margin:0; padding-left: 18px;">
+            <?php foreach ($pegawaiList as $idx => $pg): ?>
+              <li style="margin-bottom:8px;">
+                <div><strong><?= $idx + 1 ?>.</strong> <?= $pg['nama'] ?? '' ?></div>
+                <div style="padding-left:14px;">
+                  <div>Pangkat/Gol : <?= $pg['pangkat'] ?? '' ?></div>
+                  <div>NIP : <?= $pg['nip'] ?? '' ?></div>
+                  <div>Jabatan : <?= $pg['jabatan'] ?? '' ?></div>
+                </div>
+              </li>
+            <?php endforeach; ?>
+          </ol>
+        <?php endif; ?>
       </td>
     </tr>
     <tr>
       <td style="vertical-align:top;">Untuk</td>
       <td style="vertical-align:top;">:</td>
-      <td style="vertical-align:top;"><?= $tugasSuratHtml ?></td>
+      <td style="vertical-align:top; white-space: pre-wrap;">
+        <?= $tugasSuratPlain ?>
+      </td>
     </tr>
   </table>
 

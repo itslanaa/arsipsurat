@@ -3,6 +3,20 @@
 // File: templates/surat/create.php (Final Partial Structure)
 // ================================
 ?>
+<style>
+  .preview-scroll {
+    max-height: calc(100vh - 180px);
+    overflow: auto;
+  }
+  .preview-frame {
+    background: #fff;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 28px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+</style>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
   <!-- Kolom Formulir Input -->
   <div class="bg-white p-6 rounded-lg shadow-md">
@@ -70,9 +84,9 @@
   </div>
 
   <!-- Kolom Live Preview -->
-  <div class="bg-gray-200 p-4 rounded-lg overflow-auto">
+  <div class="bg-gray-200 p-4 rounded-lg preview-scroll">
     <div class="preview-container" id="preview-wrapper">
-      <div id="preview-container">
+      <div id="preview-container" class="preview-frame">
         <?php include __DIR__ . '/partials/preview_surat_tugas.php'; ?>
       </div>
     </div>
@@ -234,18 +248,20 @@
   const previewContainer = document.getElementById('preview-container');
 
   /* --- util --- */
-  function nl2br(str) {
-    if (!str) return '';
-    return String(str).replace(/\n/g, '<br>');
-  }
-
   function setText(spanId, value, {
-    html = false
+    html = false,
+    preserve = false
   } = {}) {
     const el = document.getElementById(spanId);
     if (!el) return;
-    if (html) el.innerHTML = value ?? '';
-    else el.textContent = value ?? '';
+    if (preserve) {
+      el.textContent = value ?? '';
+      el.style.whiteSpace = 'pre-wrap';
+    } else if (html) {
+      el.innerHTML = value ?? '';
+    } else {
+      el.textContent = value ?? '';
+    }
   }
 
   /* daftar field utk kedua template */
@@ -259,16 +275,10 @@
   ];
   const BIND_MAP_TUGAS = [
     ['dasarSurat', 'preview-dasar', {
-      html: true,
-      nl2br: true
+      preserve: true
     }],
-    ['pegawaiNama', 'preview-pegawaiNama', {}],
-    ['pegawaiPangkat', 'preview-pegawaiPangkat', {}],
-    ['pegawaiNip', 'preview-pegawaiNip', {}],
-    ['pegawaiJabatan', 'preview-pegawaiJabatan', {}],
     ['tugasSurat', 'preview-tugas', {
-      html: true,
-      nl2br: true
+      preserve: true
     }],
   ];
   const BIND_MAP_KET = [
@@ -303,13 +313,10 @@
             day: 'numeric'
           }) : '';
           setText(spanId, formatted);
-        } else if (opt.html && opt.nl2br) {
-          setText(spanId, nl2br(input.value), {
-            html: true
-          });
         } else {
           setText(spanId, input.value, {
-            html: !!opt.html
+            html: !!opt.html,
+            preserve: !!opt.preserve
           });
         }
       };
@@ -335,16 +342,17 @@
           day: 'numeric'
         }) : '';
         setText(spanId, formatted);
-      } else if (opt.html && opt.nl2br) {
-        setText(spanId, nl2br(input.value), {
-          html: true
-        });
       } else {
         setText(spanId, input.value, {
-          html: !!opt.html
+          html: !!opt.html,
+          preserve: !!opt.preserve
         });
       }
     });
+
+    if (template === 'tugas') {
+      renderPegawaiPreview();
+    }
   }
 
   /* switch partial form + preview via AJAX */
@@ -358,6 +366,7 @@
         formContainer.innerHTML = html;
         // setelah form masuk DOM, pasang listener baru utk template ini
         attachLivePreview(template);
+        initPegawaiRepeater();
         // lalu sinkronkan nilai awal ke preview
         updatePreviewFromForm(template);
       });
@@ -366,14 +375,106 @@
     fetch(`<?= BASE_URL ?>/surat/get_partial?part=preview&template=${template}`)
       .then(res => res.text())
       .then(html => {
-        previewContainer.innerHTML = html;
+        previewContainer.innerHTML = `<div class="preview-frame">${html}</div>`;
         // setelah preview ganti, refresh isian dari form ke preview
         updatePreviewFromForm(template);
       });
   });
 
   /* inisialisasi default: template 'tugas' */
+  function collectPegawai() {
+    const rows = document.querySelectorAll('.pegawai-item');
+    const data = [];
+    rows.forEach(row => {
+      const nama = row.querySelector('[data-field="nama"]')?.value?.trim() ?? '';
+      const pangkat = row.querySelector('[data-field="pangkat"]')?.value?.trim() ?? '';
+      const nip = row.querySelector('[data-field="nip"]')?.value?.trim() ?? '';
+      const jabatan = row.querySelector('[data-field="jabatan"]')?.value?.trim() ?? '';
+      if (nama || pangkat || nip || jabatan) {
+        data.push({ nama, pangkat, nip, jabatan });
+      }
+    });
+    return data.length ? data : [{ nama: '', pangkat: '', nip: '', jabatan: '' }];
+  }
+
+  function renderPegawaiPreview() {
+    const data = collectPegawai();
+    const singleWrap = document.getElementById('preview-pegawai-single');
+    const multiWrap = document.getElementById('preview-pegawai-multi');
+    const listEl = document.getElementById('preview-pegawai-list');
+    if (!singleWrap || !multiWrap || !listEl) return;
+
+    const rows = document.querySelectorAll('.pegawai-item');
+    rows.forEach(row => {
+      const btn = row.querySelector('.btn-remove-pegawai');
+      if (!btn) return;
+      if (rows.length > 1) btn.classList.remove('hidden');
+      else btn.classList.add('hidden');
+    });
+
+    if (data.length === 1) {
+      singleWrap.classList.remove('hidden');
+      multiWrap.classList.add('hidden');
+      setText('preview-pegawaiNama', data[0].nama);
+      setText('preview-pegawaiPangkat', data[0].pangkat);
+      setText('preview-pegawaiNip', data[0].nip);
+      setText('preview-pegawaiJabatan', data[0].jabatan);
+    } else {
+      singleWrap.classList.add('hidden');
+      multiWrap.classList.remove('hidden');
+      listEl.innerHTML = '';
+      data.forEach((row, idx) => {
+        const li = document.createElement('li');
+        li.className = 'mb-3';
+        li.innerHTML = `
+          <div><strong>${idx + 1}.</strong> ${row.nama || '-'}</div>
+          <div style="padding-left:18px;">
+            <div>Pangkat/Gol : ${row.pangkat || '-'}</div>
+            <div>NIP : ${row.nip || '-'}</div>
+            <div>Jabatan : ${row.jabatan || '-'}</div>
+          </div>`;
+        listEl.appendChild(li);
+      });
+    }
+  }
+
+  function initPegawaiRepeater() {
+    const container = document.getElementById('pegawaiRepeater');
+    if (!container) return;
+
+    const addBtn = document.getElementById('btnAddPegawai');
+    const template = document.getElementById('pegawai-template');
+
+    const bindInput = (row) => {
+      row.querySelectorAll('input').forEach(inp => {
+        ['input', 'change'].forEach(evt => inp.addEventListener(evt, () => {
+          renderPegawaiPreview();
+        }));
+      });
+      const rm = row.querySelector('.btn-remove-pegawai');
+      if (rm) {
+        rm.addEventListener('click', () => {
+          row.remove();
+          renderPegawaiPreview();
+        });
+      }
+    };
+
+    container.querySelectorAll('.pegawai-item').forEach(bindInput);
+
+    if (addBtn && template) {
+      addBtn.addEventListener('click', () => {
+        const clone = template.content.firstElementChild.cloneNode(true);
+        container.appendChild(clone);
+        bindInput(clone);
+        renderPegawaiPreview();
+      });
+    }
+    renderPegawaiPreview();
+  }
+
   attachLivePreview('tugas');
   updatePreviewFromForm('tugas');
+  initPegawaiRepeater();
   composeNomorSurat();
 </script>
