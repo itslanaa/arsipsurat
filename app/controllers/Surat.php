@@ -27,6 +27,8 @@ class Surat extends Controller
         $data['templates'] = $this->model('Surat_model')->getAllTemplates();
 
         $data['surat_list'] = $this->model('Surat_model')->getSuratKeluar(50);
+        $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
+        $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Sekretariat'];
 
 
 
@@ -43,6 +45,8 @@ class Surat extends Controller
         $post   = $_POST;
         $raw    = $post['template_id'] ?? '';      // bisa 'tugas'/'keterangan' atau angka ID
         $export = $post['export_scope'] ?? 'pdf';  // 'pdf' | 'doc'
+        $idSuratMasuk = !empty($post['id_surat_masuk']) ? (int)$post['id_surat_masuk'] : null;
+        $kodeKlasifikasi = trim($post['kodeKlasifikasi'] ?? '');
 
         if ($raw === '') {
             http_response_code(400);
@@ -124,6 +128,10 @@ class Surat extends Controller
 
         $noSurat           = $e($post['noSurat'] ?? '');
 
+        if ($kodeKlasifikasi === '' && str_contains($noSurat, '/')) {
+            $kodeKlasifikasi = trim(explode('/', $noSurat)[0]);
+        }
+
         // Surat Tugas
         $dasarSuratHtml    = $nl2p($post['dasarSurat'] ?? '');
         $pegawaiNama       = $e($post['pegawaiNama'] ?? '');
@@ -192,6 +200,8 @@ class Surat extends Controller
                 'id_user_pembuat' => $userId,
                 'nama_file_pdf'   => $filename, // kolom kamu bernama nama_file_pdf
                 'path_file'       => 'uploads/surat_dihasilkan/' . $filename,
+                'kode_klasifikasi' => $kodeKlasifikasi,
+                'id_surat_masuk' => $idSuratMasuk,
             ]);
 
             /* === SET FLASH === */
@@ -233,12 +243,14 @@ class Surat extends Controller
             $this->model('Surat_model')->insertSuratKeluar([
                 'id_template'     => $idTemplate,
                 'nomor_surat'     => $post['noSurat'] ?? '',
-                'tanggal_surat'   => $post['tglSurat'] ?? null,
+                'tanggal_surat'   => $tanggalSuratDb,
                 'perihal'         => $perihal,
                 'data_surat'      => json_encode($post, JSON_UNESCAPED_UNICODE),
                 'id_user_pembuat' => $userId,
                 'nama_file_pdf'   => $filename, // pdf atau docx sama-sama disimpan di kolom ini
                 'path_file'       => 'uploads/surat_dihasilkan/' . $filename,
+                'kode_klasifikasi' => $kodeKlasifikasi,
+                'id_surat_masuk' => $idSuratMasuk,
             ]);
 
             /* === SET FLASH === */

@@ -70,9 +70,12 @@
         <a href="#instalasi" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Instalasi</a>
         <a href="#akses-login" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Akses & Login</a>
         <a href="#menu-utama" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Menu Utama</a>
+        <a href="#alur-surat-masuk" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Alur Surat Masuk</a>
+        <a href="#alur-surat-keluar" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Alur Surat Keluar</a>
         <a href="#buat-surat" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Membuat Surat</a>
         <a href="#generate-simpan" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Generate & Simpan</a>
         <a href="#arsip" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Manajemen Arsip</a>
+        <a href="#penomoran-arsip" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Penomoran & Pengarsipan</a>
         <a href="#flash" class="px-3 py-1 rounded-full text-sm border hover:bg-gray-50">Notifikasi</a>
     </div>
 
@@ -121,14 +124,42 @@
         <ul class="list-disc pl-5 space-y-1 text-sm">
             <li><strong>Dashboard:</strong> ringkasan total arsip, total kategori, total pengguna, dan beberapa grafik seperti Distribusi Arsip per Kategori dan tren pembuatan surat.</li>
             <li><strong>Arsip Digital:</strong> Tempat pengarsipan dokumen menjadi dokumen digital yang mudah diakses (Pencarian & Filter Tersedia).</li>
+            <li><strong>Surat Masuk:</strong> Mencatat register surat masuk, kartu disposisi Camat/Sekcam, distribusi Umpeg, serta lampiran scan untuk jejak audit.</li>
             <li><strong>Buat Surat:</strong> Tempat pembuatan surat keluar dengan beberapa template yang tersedia dan siap digunakan.</li>
             <li><strong>Kategori:</strong> Digunakan untuk mengkategorikan jenis dokumen arsip.</li>
         </ul>
     </section>
 
+    <!-- 5. Alur Surat Masuk -->
+    <section id="alur-surat-masuk" class="mb-8">
+        <h4 class="text-lg font-semibold mb-2">5. Alur Surat Masuk (Disposisi)</h4>
+        <ol class="list-decimal pl-5 space-y-2 text-sm">
+            <li><strong>Surat diterima</strong> oleh petugas dan <strong>diregister</strong> di buku kendali surat masuk. Sertakan <em>kartu disposisi</em> yang akan memuat instruksi Camat.</li>
+            <li><strong>Camat</strong> memeriksa dan memberikan <strong>disposisi</strong> awal pada kartu disposisi.</li>
+            <li><strong>Sekretaris Camat</strong> menindaklanjuti disposisi Camat dan menentukan <strong>unit pengolah</strong> yang harus memproses surat.</li>
+            <li><strong>Kasubag Umum & Kepegawaian</strong> menerima surat yang telah didisposisikan dan <strong>mendistribusikannya ke unit pengolah</strong> yang ditetapkan.</li>
+            <li><strong>Unit pengolah</strong> menindaklanjuti sesuai instruksi, menyiapkan lampiran/dokumen pendukung bila diperlukan, dan memastikan status penyelesaian tercatat.</li>
+        </ol>
+        <div class="mt-3 p-3 rounded-md bg-yellow-50 border border-yellow-100 text-sm">
+            <span class="font-medium">Tip:</span> simpan salinan kartu disposisi bersama arsip digital surat masuk agar jejak instruksi Camat mudah dilacak.
+        </div>
+    </section>
+
+    <!-- 6. Alur Surat Keluar -->
+    <section id="alur-surat-keluar" class="mb-8">
+        <h4 class="text-lg font-semibold mb-2">6. Alur Surat Keluar</h4>
+        <ol class="list-decimal pl-5 space-y-2 text-sm">
+            <li><strong>Unit pengolah</strong> menyiapkan draft surat sesuai tugas/disposisi yang diterima.</li>
+            <li>Surat selesai disusun lalu <strong>diregistrasi</strong> di <em>buku register surat tugas</em> untuk memperoleh nomor resmi.</li>
+            <li>Petugas memberikan <strong>nomor registrasi</strong> pada surat keluar.</li>
+            <li>Surat bernomor resmi <strong>diberikan kembali kepada unit pengolah</strong> untuk dikirimkan atau diunggah sebagai arsip digital.</li>
+        </ol>
+        <p class="text-sm text-gray-700 mt-2">Proses ini dapat diikuti saat menggunakan menu <strong>Buat Surat</strong> sehingga nomor registrasi dan file digital selalu tercatat.</p>
+    </section>
+
     <!-- 5. Manajemen Arsip -->
     <section id="arsip" class="mb-8">
-        <h4 class="text-lg font-semibold mb-2">5. Manajemen Arsip</h4>
+        <h4 class="text-lg font-semibold mb-2">7. Manajemen Arsip</h4>
         <img src="<?= BASE_URL; ?>/assets/img/panduan-manajemen-arsip.png" width="800px" height="800px">
         <ul class="list-disc pl-5 space-y-1 text-sm">
             <li>Buka menu <strong>Arsip Digital</strong> untuk melihat dokumen arsip.</li>
@@ -140,7 +171,7 @@
 
     <!-- 6. Membuat Surat -->
     <section id="buat-surat" class="mb-8">
-        <h4 class="text-lg font-semibold mb-2">6. Membuat Surat Baru</h4>
+        <h4 class="text-lg font-semibold mb-2">8. Membuat Surat Baru</h4>
         <ol class="list-decimal pl-5 space-y-1 text-sm mb-4">
             <li>Buka menu <strong>Buat Surat</strong>.</li>
             <li>Pilih <strong>Template</strong> (mis. Surat Keterangan/Surat Tugas).</li>
@@ -194,7 +225,7 @@
 
     <!-- 7. Generate & Simpan -->
     <section id="generate-simpan" class="mb-8">
-        <h4 class="text-lg font-semibold mb-2">7. Generate, Simpan & Unduh</h4>
+        <h4 class="text-lg font-semibold mb-2">9. Generate, Simpan & Unduh</h4>
         <ol class="list-decimal pl-5 space-y-1 text-sm">
             <li>Periksa kembali pratinjau (preview).</li>
             <li>Klik <strong>Generate</strong>. Sistem akan <strong>menyimpan otomatis</strong> ke database dan menampilkannya ditabel riwayat surat keluar dibawah halaman buat surat.</li>
@@ -202,9 +233,19 @@
         </ol>
     </section>
 
+    <!-- 10. Penomoran & Pengarsipan -->
+    <section id="penomoran-arsip" class="mb-8">
+        <h4 class="text-lg font-semibold mb-2">10. Penomoran & Pengarsipan</h4>
+        <div class="p-3 rounded-md bg-blue-50 border border-blue-100 text-sm space-y-2">
+            <p><span class="font-medium">Format nomor surat keluar</span> mengikuti pola: <code>kode_kelasifikasi/nomor_registrasi -Unit Pengolah</code>. Contoh: <strong>800.1/01 -Umpeg</strong> (kode klasifikasi &lt;=&gt; bidang/jenis surat).</p>
+            <p><span class="font-medium">Kode klasifikasi</span> wajib dipakai kembali saat <strong>mengarsipkan</strong> surat agar struktur folder maupun metadata konsisten dengan ketentuan pemerintah.</p>
+            <p><span class="font-medium">Lampiran pendukung</span> (mis. disposisi camat, kartu disposisi, bukti terima) sebaiknya dipindai dan diunggah bersama file utama untuk menjaga jejak audit.</p>
+        </div>
+    </section>
+
     <!-- 8. Notifikasi -->
     <section id="flash" class="mb-8">
-        <h4 class="text-lg font-semibold mb-2">8. Notifikasi (Flash)</h4>
+        <h4 class="text-lg font-semibold mb-2">11. Notifikasi (Flash)</h4>
         <div class="flex gap-4 mb-4">
             <img src="<?= BASE_URL; ?>/assets/img/panduan-notif-berhasil.png"
                 alt="Langkah instalasi 1"

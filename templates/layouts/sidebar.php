@@ -15,6 +15,10 @@
             <i class="fas fa-archive fa-fw sidebar-icon mr-3"></i>
             <span>Arsip Digital</span>
         </a>
+        <a href="<?= BASE_URL; ?>/suratmasuk" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Surat Masuk')) ? 'active-link' : ''; ?>">
+            <i class="fas fa-inbox fa-fw sidebar-icon mr-3"></i>
+            <span>Surat Masuk</span>
+        </a>
         <a href="<?= BASE_URL; ?>/surat" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Surat')) ? 'active-link' : ''; ?>">
             <i class="fas fa-file-signature fa-fw sidebar-icon mr-3"></i>
             <span>Buat Surat</span>

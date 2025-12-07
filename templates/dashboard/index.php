@@ -1,5 +1,5 @@
 <!-- Statistik Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
     <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
         <div class="p-3 rounded-full bg-blue-100 text-blue-600">
             <i class="fas fa-folder-open text-2xl"></i>
@@ -16,6 +16,15 @@
         <div class="ml-4">
             <p class="text-gray-500">Total Surat Dibuat</p>
             <p class="text-2xl font-bold"><?= number_format($total_surat ?? 0) ?></p>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+        <div class="p-3 rounded-full bg-indigo-100 text-indigo-600">
+            <i class="fas fa-inbox text-2xl"></i>
+        </div>
+        <div class="ml-4">
+            <p class="text-gray-500">Surat Masuk Tercatat</p>
+            <p class="text-2xl font-bold"><?= number_format($total_surat_masuk ?? 0); ?></p>
         </div>
     </div>
     <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
@@ -60,8 +69,43 @@
 
 <!-- Grid grafik tambahan -->
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="bg-white rounded-xl shadow p-6">
+    <h3 class="text-lg font-semibold mb-2">Status Surat Masuk</h3>
+    <p class="text-sm text-gray-500 mb-3">Rekap alur registrasi, disposisi Camat/Sekcam, hingga distribusi ke unit pengolah.</p>
+    <?php
+      $statusMap = [
+        'diterima' => 'Diterima/Registrasi',
+        'instruksi_camat' => 'Disposisi Camat',
+        'sekcam' => 'Disposisi Sekcam',
+        'distribusi_umpeg' => 'Distribusi Umpeg',
+        'diproses_unit' => 'Diproses Unit',
+        'selesai' => 'Selesai'
+      ];
+    ?>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="border-b text-gray-500">
+            <th class="py-2 text-left">Status</th>
+            <th class="py-2 text-left">Jumlah</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (!empty($surat_masuk_status)): ?>
+            <?php foreach ($surat_masuk_status as $row): ?>
+              <tr class="border-b last:border-0">
+                <td class="py-2"><?= htmlspecialchars($statusMap[$row['status']] ?? $row['status']); ?></td>
+                <td class="py-2 font-semibold"><?= (int)$row['jml']; ?></td>
+              </tr>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <tr><td colspan="2" class="py-2 text-gray-400">Belum ada data surat masuk.</td></tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-  
   <!-- Komposisi Template Surat -->
   <div class="bg-white rounded-xl shadow p-6">
     <h3 class="text-lg font-semibold mb-4">Komposisi Template Surat</h3>
