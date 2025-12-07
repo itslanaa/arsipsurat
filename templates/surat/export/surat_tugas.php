@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <title>Surat Tugas</title>
 <style>
-  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12pt; }
+  body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12pt; line-height: 1.8; }
   .text-center { text-align:center; }
   .text-justify { text-align: justify; }
   .kop-table { width:100%; border-collapse:collapse; margin-bottom: 8px; }
