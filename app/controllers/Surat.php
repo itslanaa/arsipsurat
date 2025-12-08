@@ -342,12 +342,6 @@ class Surat extends Controller
             exit;
         }
 
-        if (!method_exists($arsipModel, 'lampirkanSuratKeluar')) {
-            Flasher::setFlash('Gagal', 'Fitur arsipkan belum tersedia.', 'danger');
-            header('Location: ' . BASE_URL . '/surat');
-            exit;
-        }
-
         $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
 
         if ($copied) {
