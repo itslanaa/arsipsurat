@@ -33,6 +33,8 @@ class Surat extends Controller
 
         $data['surat_list'] = $this->model('Surat_model')->getSuratKeluar(50);
         $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
+        $data['arsip_map'] = $this->buildArsipMap($data['surat_list']);
+        $data['arsip_status'] = $this->buildArsipStatus($data['surat_list']);
         $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
 
 
@@ -313,6 +315,105 @@ class Surat extends Controller
         }
     }
 
+    public function archive()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        $idSurat = isset($_POST['surat_id']) ? (int)$_POST['surat_id'] : 0;
+        $idArsip = isset($_POST['arsip_id']) ? (int)$_POST['arsip_id'] : 0;
+
+        if ($idSurat <= 0 || $idArsip <= 0) {
+            Flasher::setFlash('Gagal', 'Arsip atau surat tidak valid.', 'danger');
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        $suratModel = $this->model('Surat_model');
+        $arsipModel = $this->model('Arsip_model');
+
+        $surat = $suratModel->getSuratKeluarById($idSurat);
+        $arsip = $arsipModel->getArsipById($idArsip);
+
+        if (!$surat || !$arsip) {
+            Flasher::setFlash('Gagal', 'Data surat atau arsip tidak ditemukan.', 'danger');
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        if (method_exists($arsipModel, 'lampirkanSuratKeluar')) {
+            $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
+        } else {
+            $copied = $this->arsipkanSuratKeluarFallback($arsip['id'], $surat);
+        }
+
+        if ($copied) {
+            Flasher::setFlash('Berhasil', 'File surat keluar berhasil diarsipkan.', 'success');
+        } else {
+            Flasher::setFlash('Gagal', 'File surat tidak dapat diarsipkan.', 'error');
+        }
+
+        header('Location: ' . BASE_URL . '/surat');
+        exit;
+    }
+
+    private function arsipkanSuratKeluarFallback(int $idArsip, array $suratKeluar)
+    {
+        $source = $this->resolveSuratKeluarPath($suratKeluar);
+        if (!$source) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($source, PATHINFO_EXTENSION));
+        $namaFileUnik = uniqid('sk-') . ($ext ? '.' . $ext : '');
+
+        $destFolder = APPROOT . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'arsip';
+        if (!is_dir($destFolder)) {
+            @mkdir($destFolder, 0775, true);
+        }
+
+        $dest = $destFolder . DIRECTORY_SEPARATOR . $namaFileUnik;
+        if (!copy($source, $dest)) {
+            return false;
+        }
+
+        $db = new Database;
+        $db->query("INSERT INTO arsip_files (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file) VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)");
+        $db->bind('id_arsip', $idArsip);
+        $db->bind('nama_asli', $suratKeluar['nama_file_pdf'] ?? $namaFileUnik);
+        $db->bind('nama_unik', $namaFileUnik);
+        $db->bind('path', 'uploads/arsip/' . $namaFileUnik);
+        $db->bind('ukuran', @filesize($dest));
+        $db->bind('id_surat_masuk_file', null);
+        $db->execute();
+
+        return $db->rowCount() > 0;
+    }
+
+    private function resolveSuratKeluarPath(array $suratKeluar)
+    {
+        $rawPath = trim($suratKeluar['path_file'] ?? '');
+        if ($rawPath === '') {
+            return null;
+        }
+
+        $normalized = ltrim(str_replace(['\\\\', '/'], DIRECTORY_SEPARATOR, $rawPath), DIRECTORY_SEPARATOR);
+        $candidates = [
+            APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $normalized,
+            APPROOT . DIRECTORY_SEPARATOR . $normalized,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
     public function delete($id)
     {
         $row = $this->model('Surat_model')->getSuratKeluarById((int)$id);
@@ -364,5 +465,34 @@ class Surat extends Controller
     private function currentUserId()
     {
         return $_SESSION['user_id']['id'] ?? $_SESSION['user_id'] ?? 0;
+    }
+
+    private function buildArsipMap(array $suratList)
+    {
+        $map = [];
+        $arsipModel = $this->model('Arsip_model');
+        $ids = array_unique(array_filter(array_column($suratList, 'id_surat_masuk')));
+        foreach ($ids as $idSm) {
+            $map[$idSm] = $arsipModel->getArsipBySuratMasuk((int)$idSm);
+        }
+        return $map;
+    }
+
+    private function buildArsipStatus(array $suratList)
+    {
+        $status = [];
+        $arsipModel = $this->model('Arsip_model');
+
+        foreach ($suratList as $row) {
+            $found = $arsipModel->findArsipFileForSuratKeluar($row);
+            if ($found) {
+                $status[$row['id']] = [
+                    'arsip_id' => $found['id_arsip'],
+                    'file_id' => $found['id'],
+                ];
+            }
+        }
+
+        return $status;
     }
 }
