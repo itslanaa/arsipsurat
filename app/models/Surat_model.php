@@ -27,6 +27,21 @@ class Surat_model
         return $this->db->resultSet();
     }
 
+    public function getSuratKeluarByUser($userId, $limit = 50)
+    {
+        $this->db->query("
+    SELECT sk.*, t.nama_template
+    FROM surat_keluar sk
+    LEFT JOIN template_surat t ON t.id = sk.id_template
+    WHERE sk.id_user_pembuat = :uid
+    ORDER BY sk.id DESC
+    LIMIT :lim
+  ");
+        $this->db->bind('uid', (int)$userId);
+        $this->db->bind('lim', (int)$limit);
+        return $this->db->resultSet();
+    }
+
     public function getSuratKeluarById($id)
     {
         $this->db->query("SELECT * FROM surat_keluar WHERE id=:id LIMIT 1");

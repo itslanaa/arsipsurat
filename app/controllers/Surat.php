@@ -31,7 +31,12 @@ class Surat extends Controller
         // Mengambil daftar template dari model
         $data['templates'] = $this->model('Surat_model')->getAllTemplates();
 
-        $data['surat_list'] = $this->model('Surat_model')->getSuratKeluar(50);
+        $suratModel = $this->model('Surat_model');
+        if (currentRole() === 'unit') {
+            $data['surat_list'] = $suratModel->getSuratKeluarByUser($this->currentUserId(), 50);
+        } else {
+            $data['surat_list'] = $suratModel->getSuratKeluar(50);
+        }
         $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
         $data['arsip_map'] = $this->buildArsipMap($data['surat_list']);
         $data['arsip_status'] = $this->buildArsipStatus($data['surat_list']);
