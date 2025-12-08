@@ -330,8 +330,11 @@ class Surat extends Controller
             exit;
         }
 
-        $surat = $this->model('Surat_model')->getSuratKeluarById($idSurat);
-        $arsip = $this->model('Arsip_model')->getArsipById($idArsip);
+        $suratModel = $this->model('Surat_model');
+        $arsipModel = $this->model('Arsip_model');
+
+        $surat = $suratModel->getSuratKeluarById($idSurat);
+        $arsip = $arsipModel->getArsipById($idArsip);
 
         if (!$surat || !$arsip) {
             Flasher::setFlash('Gagal', 'Data surat atau arsip tidak ditemukan.', 'danger');
@@ -339,7 +342,13 @@ class Surat extends Controller
             exit;
         }
 
-        $copied = $this->model('Arsip_model')->lampirkanSuratKeluar($arsip['id'], $surat);
+        if (!method_exists($arsipModel, 'lampirkanSuratKeluar')) {
+            Flasher::setFlash('Gagal', 'Fitur arsipkan belum tersedia.', 'danger');
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
 
         if ($copied) {
             Flasher::setFlash('Berhasil', 'File surat keluar berhasil diarsipkan.', 'success');
