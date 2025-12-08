@@ -342,7 +342,11 @@ class Surat extends Controller
             exit;
         }
 
-        $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
+        if (method_exists($arsipModel, 'lampirkanSuratKeluar')) {
+            $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
+        } else {
+            $copied = $this->arsipkanSuratKeluarFallback($arsip['id'], $surat);
+        }
 
         if ($copied) {
             Flasher::setFlash('Berhasil', 'File surat keluar berhasil diarsipkan.', 'success');
@@ -352,6 +356,61 @@ class Surat extends Controller
 
         header('Location: ' . BASE_URL . '/surat');
         exit;
+    }
+
+    private function arsipkanSuratKeluarFallback(int $idArsip, array $suratKeluar)
+    {
+        $source = $this->resolveSuratKeluarPath($suratKeluar);
+        if (!$source) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($source, PATHINFO_EXTENSION));
+        $namaFileUnik = uniqid('sk-') . ($ext ? '.' . $ext : '');
+
+        $destFolder = APPROOT . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'arsip';
+        if (!is_dir($destFolder)) {
+            @mkdir($destFolder, 0775, true);
+        }
+
+        $dest = $destFolder . DIRECTORY_SEPARATOR . $namaFileUnik;
+        if (!copy($source, $dest)) {
+            return false;
+        }
+
+        $db = new Database;
+        $db->query("INSERT INTO arsip_files (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file) VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)");
+        $db->bind('id_arsip', $idArsip);
+        $db->bind('nama_asli', $suratKeluar['nama_file_pdf'] ?? $namaFileUnik);
+        $db->bind('nama_unik', $namaFileUnik);
+        $db->bind('path', 'uploads/arsip/' . $namaFileUnik);
+        $db->bind('ukuran', @filesize($dest));
+        $db->bind('id_surat_masuk_file', null);
+        $db->execute();
+
+        return $db->rowCount() > 0;
+    }
+
+    private function resolveSuratKeluarPath(array $suratKeluar)
+    {
+        $rawPath = trim($suratKeluar['path_file'] ?? '');
+        if ($rawPath === '') {
+            return null;
+        }
+
+        $normalized = ltrim(str_replace(['\\\\', '/'], DIRECTORY_SEPARATOR, $rawPath), DIRECTORY_SEPARATOR);
+        $candidates = [
+            APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $normalized,
+            APPROOT . DIRECTORY_SEPARATOR . $normalized,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 
     public function delete($id)
