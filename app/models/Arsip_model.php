@@ -53,12 +53,8 @@ class Arsip_model {
 
     public function lampirkanSuratKeluar(int $idArsip, array $suratKeluar)
     {
-        if (empty($suratKeluar['path_file'])) {
-            return false;
-        }
-
-        $source = APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . ltrim($suratKeluar['path_file'], DIRECTORY_SEPARATOR);
-        if (!is_file($source)) {
+        $source = $this->resolveSuratKeluarPath($suratKeluar);
+        if (!$source) {
             return false;
         }
 
@@ -87,7 +83,29 @@ class Arsip_model {
         $this->db->bind('id_surat_masuk_file', null);
 
         $this->db->execute();
-        return $this->db->rowCount();
+        return $this->db->rowCount() > 0;
+    }
+
+    private function resolveSuratKeluarPath(array $suratKeluar)
+    {
+        $rawPath = trim($suratKeluar['path_file'] ?? '');
+        if ($rawPath === '') {
+            return null;
+        }
+
+        $normalized = ltrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $rawPath), DIRECTORY_SEPARATOR);
+        $candidates = [
+            APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $normalized,
+            APPROOT . DIRECTORY_SEPARATOR . $normalized,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 
     public function tambahDataArsip($data, $files)

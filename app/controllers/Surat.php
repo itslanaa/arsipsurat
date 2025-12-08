@@ -347,7 +347,7 @@ class Surat extends Controller
         if ($copied) {
             Flasher::setFlash('Berhasil', 'File surat keluar berhasil diarsipkan.', 'success');
         } else {
-            Flasher::setFlash('Gagal', 'File surat tidak dapat diarsipkan.', 'danger');
+            Flasher::setFlash('Gagal', 'File surat tidak dapat diarsipkan.', 'error');
         }
 
         header('Location: ' . BASE_URL . '/surat');
