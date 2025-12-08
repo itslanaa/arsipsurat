@@ -342,18 +342,12 @@ class Surat extends Controller
             exit;
         }
 
-        if (!method_exists($arsipModel, 'lampirkanSuratKeluar')) {
-            Flasher::setFlash('Gagal', 'Fitur arsipkan belum tersedia.', 'danger');
-            header('Location: ' . BASE_URL . '/surat');
-            exit;
-        }
-
         $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
 
         if ($copied) {
             Flasher::setFlash('Berhasil', 'File surat keluar berhasil diarsipkan.', 'success');
         } else {
-            Flasher::setFlash('Gagal', 'File surat tidak dapat diarsipkan.', 'danger');
+            Flasher::setFlash('Gagal', 'File surat tidak dapat diarsipkan.', 'error');
         }
 
         header('Location: ' . BASE_URL . '/surat');
