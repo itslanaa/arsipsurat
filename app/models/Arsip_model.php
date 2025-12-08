@@ -51,6 +51,85 @@ class Arsip_model {
         return $this->db->resultSet();
     }
 
+    public function findArsipFileForSuratKeluar(array $suratKeluar)
+    {
+        $namaFile = trim($suratKeluar['nama_file_pdf'] ?? '');
+        if ($namaFile === '') {
+            return null;
+        }
+
+        $sql = "SELECT af.* FROM {$this->files_table} af JOIN {$this->table} a ON a.id = af.id_arsip WHERE af.nama_file_asli = :nama";
+        if (!empty($suratKeluar['id_surat_masuk'])) {
+            $sql .= " AND a.id_surat_masuk = :id_surat_masuk";
+        }
+        $sql .= " ORDER BY af.id DESC LIMIT 1";
+
+        $this->db->query($sql);
+        $this->db->bind('nama', $namaFile);
+        if (!empty($suratKeluar['id_surat_masuk'])) {
+            $this->db->bind('id_surat_masuk', (int)$suratKeluar['id_surat_masuk']);
+        }
+
+        return $this->db->single();
+    }
+
+    public function lampirkanSuratKeluar(int $idArsip, array $suratKeluar)
+    {
+        $source = $this->resolveSuratKeluarPath($suratKeluar);
+        if (!$source) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($source, PATHINFO_EXTENSION));
+        $namaFileUnik = uniqid('sk-');
+        if ($ext) {
+            $namaFileUnik .= '.' . $ext;
+        }
+
+        $destFolder = APPROOT . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'arsip';
+        if (!is_dir($destFolder)) {
+            @mkdir($destFolder, 0775, true);
+        }
+        $dest = $destFolder . DIRECTORY_SEPARATOR . $namaFileUnik;
+
+        if (!copy($source, $dest)) {
+            return false;
+        }
+
+        $this->db->query("INSERT INTO {$this->files_table} (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file) VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)");
+        $this->db->bind('id_arsip', $idArsip);
+        $this->db->bind('nama_asli', $suratKeluar['nama_file_pdf'] ?? $namaFileUnik);
+        $this->db->bind('nama_unik', $namaFileUnik);
+        $this->db->bind('path', 'uploads/arsip/' . $namaFileUnik);
+        $this->db->bind('ukuran', @filesize($dest));
+        $this->db->bind('id_surat_masuk_file', null);
+
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
+    }
+
+    private function resolveSuratKeluarPath(array $suratKeluar)
+    {
+        $rawPath = trim($suratKeluar['path_file'] ?? '');
+        if ($rawPath === '') {
+            return null;
+        }
+
+        $normalized = ltrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $rawPath), DIRECTORY_SEPARATOR);
+        $candidates = [
+            APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $normalized,
+            APPROOT . DIRECTORY_SEPARATOR . $normalized,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
     public function tambahDataArsip($data, $files)
     {
         $query = "INSERT INTO " . $this->table . " (judul, id_kategori, tgl_upload, author, id_user_uploader, id_surat_masuk, kode_klasifikasi)

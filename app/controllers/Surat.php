@@ -34,6 +34,7 @@ class Surat extends Controller
         $data['surat_list'] = $this->model('Surat_model')->getSuratKeluar(50);
         $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
         $data['arsip_map'] = $this->buildArsipMap($data['surat_list']);
+        $data['arsip_status'] = $this->buildArsipStatus($data['surat_list']);
         $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
 
 
@@ -475,5 +476,23 @@ class Surat extends Controller
             $map[$idSm] = $arsipModel->getArsipBySuratMasuk((int)$idSm);
         }
         return $map;
+    }
+
+    private function buildArsipStatus(array $suratList)
+    {
+        $status = [];
+        $arsipModel = $this->model('Arsip_model');
+
+        foreach ($suratList as $row) {
+            $found = $arsipModel->findArsipFileForSuratKeluar($row);
+            if ($found) {
+                $status[$row['id']] = [
+                    'arsip_id' => $found['id_arsip'],
+                    'file_id' => $found['id'],
+                ];
+            }
+        }
+
+        return $status;
     }
 }
