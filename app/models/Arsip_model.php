@@ -51,6 +51,45 @@ class Arsip_model {
         return $this->db->resultSet();
     }
 
+    public function lampirkanSuratKeluar(int $idArsip, array $suratKeluar)
+    {
+        if (empty($suratKeluar['path_file'])) {
+            return false;
+        }
+
+        $source = APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . ltrim($suratKeluar['path_file'], DIRECTORY_SEPARATOR);
+        if (!is_file($source)) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo($source, PATHINFO_EXTENSION));
+        $namaFileUnik = uniqid('sk-');
+        if ($ext) {
+            $namaFileUnik .= '.' . $ext;
+        }
+
+        $destFolder = APPROOT . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'arsip';
+        if (!is_dir($destFolder)) {
+            @mkdir($destFolder, 0775, true);
+        }
+        $dest = $destFolder . DIRECTORY_SEPARATOR . $namaFileUnik;
+
+        if (!copy($source, $dest)) {
+            return false;
+        }
+
+        $this->db->query("INSERT INTO {$this->files_table} (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file) VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)");
+        $this->db->bind('id_arsip', $idArsip);
+        $this->db->bind('nama_asli', $suratKeluar['nama_file_pdf'] ?? $namaFileUnik);
+        $this->db->bind('nama_unik', $namaFileUnik);
+        $this->db->bind('path', 'uploads/arsip/' . $namaFileUnik);
+        $this->db->bind('ukuran', @filesize($dest));
+        $this->db->bind('id_surat_masuk_file', null);
+
+        $this->db->execute();
+        return $this->db->rowCount();
+    }
+
     public function tambahDataArsip($data, $files)
     {
         $query = "INSERT INTO " . $this->table . " (judul, id_kategori, tgl_upload, author, id_user_uploader, id_surat_masuk, kode_klasifikasi)
@@ -74,7 +113,7 @@ class Arsip_model {
                 $fileInfo = $this->uploadFile($file);
                 if ($fileInfo) {
                     $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
-                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+                        . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
                     $this->db->query($queryFile);
                     $this->db->bind('id_arsip', $arsipId);
                     $this->db->bind('nama_asli', $fileInfo['nama_asli']);
@@ -160,7 +199,7 @@ class Arsip_model {
                 $fileInfo = $this->uploadFile($file);
                 if ($fileInfo) {
                     $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
-                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+                        . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
                     $this->db->query($queryFile);
                     $this->db->bind('id_arsip', $data['id']);
                     $this->db->bind('nama_asli', $fileInfo['nama_asli']);
