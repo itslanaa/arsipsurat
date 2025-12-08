@@ -6,9 +6,13 @@
         </a>
     </div>
 
-    <?php $role = currentRole(); ?>
+    <?php
+    $role = currentRole();
+    $isRestrictedGeneral = in_array($role, ['camat', 'sekcam', 'unit'], true);
+    $canCreateSurat = !in_array($role, ['camat', 'sekcam'], true);
+    ?>
     <nav class="mt-6 flex-grow">
-        <?php if (!in_array($role, ['camat', 'sekcam', 'unit'], true)): ?>
+        <?php if (!$isRestrictedGeneral): ?>
             <a href="<?= BASE_URL; ?>/dashboard" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= ($judul == 'Dashboard') ? 'active-link' : ''; ?>">
                 <i class="fas fa-tachometer-alt fa-fw sidebar-icon mr-3"></i>
                 <span>Dashboard</span>
@@ -22,11 +26,13 @@
             <i class="fas fa-inbox fa-fw sidebar-icon mr-3"></i>
             <span>Surat Masuk</span>
         </a>
-        <?php if (!in_array($role, ['camat', 'sekcam', 'unit'], true)): ?>
+        <?php if ($canCreateSurat): ?>
             <a href="<?= BASE_URL; ?>/surat" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Surat')) ? 'active-link' : ''; ?>">
                 <i class="fas fa-file-signature fa-fw sidebar-icon mr-3"></i>
                 <span>Buat Surat</span>
             </a>
+        <?php endif; ?>
+        <?php if (!$isRestrictedGeneral): ?>
             <a href="<?= BASE_URL; ?>/kategori" class="nav-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 <?= (str_contains($judul, 'Kategori')) ? 'active-link' : ''; ?>">
                 <i class="fas fa-tags fa-fw sidebar-icon mr-3"></i>
                 <span>Kategori</span>
