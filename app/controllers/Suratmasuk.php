@@ -195,7 +195,7 @@ class Suratmasuk extends Controller
 
         $mpdf = new \Mpdf\Mpdf([
             'mode' => 'utf-8',
-            'format' => [210, 148],
+            'format' => 'A4',
             'margin_left' => 10,
             'margin_right' => 10,
             'margin_top' => 10,

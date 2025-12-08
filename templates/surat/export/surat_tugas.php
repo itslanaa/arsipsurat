@@ -111,7 +111,7 @@
         <!-- spacer tanda tangan: gunakan mm + nbsp supaya mPDF tidak collapse -->
       <div style="height:28mm; display:flex; align-items:flex-start; justify-content:center;">
         <?php if (!empty($showSignature)): ?>
-          <img src="<?= $ttdImgUrl ?>" alt="Tanda Tangan" style="height:100%; object-fit:contain;">
+          <img src="<?= $ttdImgUrl ?>" width="200px" height="150px" alt="Tanda Tangan" style="object-fit:contain;">
         <?php else: ?>&nbsp;<?php endif; ?>
       </div>
       <p style="font-weight:bold; text-decoration:underline;"><?= htmlspecialchars($pejabat['nama_lengkap'] ?? ''); ?></p>
