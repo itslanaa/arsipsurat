@@ -184,14 +184,15 @@
 
                 <?php
                 $arsipOptions = [];
+                $archived = $arsip_status[$r['id']] ?? null;
                 if (!empty($r['id_surat_masuk']) && isset($arsip_map[$r['id_surat_masuk']])) {
-                  $arsipOptions = $arsip_map[$r['id_surat_masuk']];
+                    $arsipOptions = $arsip_map[$r['id_surat_masuk']];
                 }
                 ?>
                 <?php if (!empty($arsipOptions)): ?>
                   <form action="<?= BASE_URL ?>/surat/archive" method="post" class="mt-2 flex items-center gap-2">
                     <input type="hidden" name="surat_id" value="<?= (int)$r['id']; ?>">
-                    <select name="arsip_id" class="border rounded px-2 py-1 text-xs">
+                    <select name="arsip_id" class="border rounded px-2 py-1 text-xs" <?= $archived ? 'disabled' : '' ?>>
                       <option value="">Pilih arsip tujuan</option>
                       <?php foreach ($arsipOptions as $arsip): ?>
                         <option value="<?= (int)$arsip['id']; ?>">
@@ -199,7 +200,7 @@
                         </option>
                       <?php endforeach; ?>
                     </select>
-                    <button type="submit" class="bg-indigo-600 text-white text-xs px-3 py-1 rounded hover:bg-indigo-700">Arsipkan</button>
+                    <button type="submit" class="bg-indigo-600 text-white text-xs px-3 py-1 rounded hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed" <?= $archived ? 'disabled' : '' ?>><?= $archived ? 'Sudah diarsipkan' : 'Arsipkan' ?></button>
                   </form>
                 <?php elseif (!empty($r['id_surat_masuk'])): ?>
                   <p class="text-[11px] text-gray-400 mt-2">Belum ada arsip terkait untuk surat masuk ini.</p>

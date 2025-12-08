@@ -51,6 +51,28 @@ class Arsip_model {
         return $this->db->resultSet();
     }
 
+    public function findArsipFileForSuratKeluar(array $suratKeluar)
+    {
+        $namaFile = trim($suratKeluar['nama_file_pdf'] ?? '');
+        if ($namaFile === '') {
+            return null;
+        }
+
+        $sql = "SELECT af.* FROM {$this->files_table} af JOIN {$this->table} a ON a.id = af.id_arsip WHERE af.nama_file_asli = :nama";
+        if (!empty($suratKeluar['id_surat_masuk'])) {
+            $sql .= " AND a.id_surat_masuk = :id_surat_masuk";
+        }
+        $sql .= " ORDER BY af.id DESC LIMIT 1";
+
+        $this->db->query($sql);
+        $this->db->bind('nama', $namaFile);
+        if (!empty($suratKeluar['id_surat_masuk'])) {
+            $this->db->bind('id_surat_masuk', (int)$suratKeluar['id_surat_masuk']);
+        }
+
+        return $this->db->single();
+    }
+
     public function lampirkanSuratKeluar(int $idArsip, array $suratKeluar)
     {
         $source = $this->resolveSuratKeluarPath($suratKeluar);
