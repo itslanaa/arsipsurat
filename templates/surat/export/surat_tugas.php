@@ -13,6 +13,8 @@
   .nomor { margin: 12px 0 24px 0; }
   .spacer-ttd { height: 80px; }
   .w-15 { width:15%; } .w-5 { width:5%; } .w-80 { width:80%; }
+  .ttd-block { font-size:12pt; line-height:1.6; }
+  .ttd-block p { margin: 4px 0; font-size:12pt; }
 </style>
 </head>
 <body>
@@ -103,7 +105,7 @@
 <table style="width:100%; border-collapse:collapse; margin-top:28px;">
   <tr>
     <td style="width:60%;"></td> <!-- kosongkan kiri untuk “dorong” ke kanan -->
-    <td style="width:40%; text-align:center; vertical-align:top;">
+    <td class="ttd-block" style="width:40%; text-align:center; vertical-align:top;">
       <p>Cibungbulang, <?= $tglSuratFormatted ?></p>
       <p style="font-weight:bold;"><?= htmlspecialchars($pejabat['jabatan'] ?? ''); ?>,</p>
         <!-- spacer tanda tangan: gunakan mm + nbsp supaya mPDF tidak collapse -->
