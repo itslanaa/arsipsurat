@@ -15,7 +15,7 @@
                 <option value="">-- Pilih Kategori --</option>
                 <?php foreach ($kategori as $kat) : ?>
                     <option value="<?= $kat['id']; ?>" <?= ($kat['id'] == $arsip['id_kategori']) ? 'selected' : ''; ?>>
-                        <?= htmlspecialchars($kat['nama_kategori']); ?>
+                        <?= htmlspecialchars($kat['kode'] . ' - ' . $kat['nama_kategori']); ?>
                     </option>
                 <?php endforeach; ?>
             </select>

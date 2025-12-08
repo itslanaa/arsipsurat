@@ -3,6 +3,7 @@
 class Arsip_model {
     private $table = 'arsip';
     private $files_table = 'arsip_files';
+    private $surat_masuk_files_table = 'surat_masuk_files';
     private $db;
 
     public function __construct()
@@ -13,10 +14,10 @@ class Arsip_model {
     public function getAllArsip()
     {
         $this->db->query("
-            SELECT a.*, k.nama_kategori, 
+            SELECT a.*, k.kode AS kode_kategori, CONCAT(k.kode, ' - ', k.nama_kategori) AS nama_kategori,
             (SELECT COUNT(*) FROM {$this->files_table} WHERE id_arsip = a.id) as jumlah_file
             FROM {$this->table} a
-            JOIN kategori_arsip k ON a.id_kategori = k.id 
+            JOIN kategori_arsip k ON a.id_kategori = k.id
             ORDER BY a.tgl_upload DESC, a.id DESC
         ");
         return $this->db->resultSet();
@@ -43,10 +44,17 @@ class Arsip_model {
         return $this->db->single();
     }
 
+    public function getArsipBySuratMasuk(int $idSuratMasuk)
+    {
+        $this->db->query("SELECT * FROM {$this->table} WHERE id_surat_masuk = :id_surat_masuk");
+        $this->db->bind('id_surat_masuk', $idSuratMasuk);
+        return $this->db->resultSet();
+    }
+
     public function tambahDataArsip($data, $files)
     {
-        $query = "INSERT INTO " . $this->table . " (judul, id_kategori, tgl_upload, author, id_user_uploader) 
-                  VALUES (:judul, :id_kategori, :tgl_upload, :author, :id_user_uploader)";
+        $query = "INSERT INTO " . $this->table . " (judul, id_kategori, tgl_upload, author, id_user_uploader, id_surat_masuk, kode_klasifikasi)
+                  VALUES (:judul, :id_kategori, :tgl_upload, :author, :id_user_uploader, :id_surat_masuk, :kode_klasifikasi)";
         
         $this->db->query($query);
         $this->db->bind('judul', $data['judul']);
@@ -54,8 +62,10 @@ class Arsip_model {
         $this->db->bind('tgl_upload', date('Y-m-d'));
         $this->db->bind('author', $_SESSION['nama_lengkap'] ?? 'Administrator');
         $this->db->bind('id_user_uploader', $_SESSION['user_id'] ?? 1);
+        $this->db->bind('id_surat_masuk', $data['id_surat_masuk'] ?? null);
+        $this->db->bind('kode_klasifikasi', $data['kode_klasifikasi'] ?? null);
         $this->db->execute();
-        
+
         $arsipId = $this->db->lastInsertId();
 
         $uploadedFiles = $this->reArrayFiles($files['files']);
@@ -63,18 +73,75 @@ class Arsip_model {
             if ($file['error'] === UPLOAD_ERR_OK) {
                 $fileInfo = $this->uploadFile($file);
                 if ($fileInfo) {
-                    $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize)
-                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran)";
+                    $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
+                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
                     $this->db->query($queryFile);
                     $this->db->bind('id_arsip', $arsipId);
                     $this->db->bind('nama_asli', $fileInfo['nama_asli']);
                     $this->db->bind('nama_unik', $fileInfo['nama_unik']);
                     $this->db->bind('path', $fileInfo['path']);
                     $this->db->bind('ukuran', $fileInfo['ukuran']);
+                    $this->db->bind('id_surat_masuk_file', null);
                     $this->db->execute();
                 }
             }
         }
+        return $arsipId;
+    }
+
+    public function salinLampiranSuratMasukKeArsip(int $idArsip, array $lampiran)
+    {
+        $copied = $this->salinLampiranSuratMasuk($lampiran);
+        if (!$copied) {
+            return false;
+        }
+
+        $queryFile = "INSERT INTO {$this->files_table} (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
+            . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+        $this->db->query($queryFile);
+        $this->db->bind('id_arsip', $idArsip);
+        $this->db->bind('nama_asli', $copied['nama_asli']);
+        $this->db->bind('nama_unik', $copied['nama_unik']);
+        $this->db->bind('path', $copied['path']);
+        $this->db->bind('ukuran', $copied['ukuran']);
+        $this->db->bind('id_surat_masuk_file', $lampiran['id'] ?? null);
+        $this->db->execute();
+
+        return $this->db->rowCount();
+    }
+
+    public function tambahArsipDariSuratMasuk(array $surat, int $idKategori, array $lampiran = [])
+    {
+        $judul = '[' . ($surat['kode_klasifikasi'] ?? '-') . '] ' . ($surat['perihal'] ?? 'Surat Masuk');
+        $query = "INSERT INTO {$this->table} (judul, id_kategori, tgl_upload, author, id_user_uploader, id_surat_masuk, kode_klasifikasi)"
+               . " VALUES (:judul, :id_kategori, :tgl_upload, :author, :id_user_uploader, :id_surat_masuk, :kode_klasifikasi)";
+
+        $this->db->query($query);
+        $this->db->bind('judul', $judul);
+        $this->db->bind('id_kategori', $idKategori);
+        $this->db->bind('tgl_upload', date('Y-m-d'));
+        $this->db->bind('author', $surat['asal_surat'] ?? ($_SESSION['nama_lengkap'] ?? 'Administrator'));
+        $this->db->bind('id_user_uploader', $_SESSION['user_id'] ?? 1);
+        $this->db->bind('id_surat_masuk', $surat['id'] ?? null);
+        $this->db->bind('kode_klasifikasi', $surat['kode_klasifikasi'] ?? null);
+        $this->db->execute();
+
+        $arsipId = $this->db->lastInsertId();
+        foreach ($lampiran as $file) {
+            $copied = $this->salinLampiranSuratMasuk($file);
+            if (!$copied) continue;
+            $queryFile = "INSERT INTO {$this->files_table} (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
+                . " VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
+            $this->db->query($queryFile);
+            $this->db->bind('id_arsip', $arsipId);
+            $this->db->bind('nama_asli', $copied['nama_asli']);
+            $this->db->bind('nama_unik', $copied['nama_unik']);
+            $this->db->bind('path', $copied['path']);
+            $this->db->bind('ukuran', $copied['ukuran']);
+            $this->db->bind('id_surat_masuk_file', $file['id'] ?? null);
+            $this->db->execute();
+        }
+
         return $arsipId;
     }
 
@@ -92,14 +159,15 @@ class Arsip_model {
             if (isset($file['error']) && $file['error'] === UPLOAD_ERR_OK) {
                 $fileInfo = $this->uploadFile($file);
                 if ($fileInfo) {
-                    $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize)
-                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran)";
+                    $queryFile = "INSERT INTO " . $this->files_table . " (id_arsip, nama_file_asli, nama_file_unik, path_file, filesize, id_surat_masuk_file)"
+                                  VALUES (:id_arsip, :nama_asli, :nama_unik, :path, :ukuran, :id_surat_masuk_file)";
                     $this->db->query($queryFile);
                     $this->db->bind('id_arsip', $data['id']);
                     $this->db->bind('nama_asli', $fileInfo['nama_asli']);
                     $this->db->bind('nama_unik', $fileInfo['nama_unik']);
                     $this->db->bind('path', $fileInfo['path']);
                     $this->db->bind('ukuran', $fileInfo['ukuran']);
+                    $this->db->bind('id_surat_masuk_file', null);
                     $this->db->execute();
                 }
             }
@@ -147,9 +215,62 @@ class Arsip_model {
             $this->db->query($query);
             $this->db->bind('id', $file_id);
             $this->db->execute();
+
+            if (!empty($file['id_surat_masuk_file'])) {
+                $lampiranSurat = $this->getLampiranSuratMasuk((int)$file['id_surat_masuk_file']);
+                if ($lampiranSurat) {
+                    $lampiranPath = APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . ltrim($lampiranSurat['path_file'], '/');
+                    if (file_exists($lampiranPath)) {
+                        unlink($lampiranPath);
+                    }
+                    $this->hapusLampiranSuratMasuk((int)$file['id_surat_masuk_file']);
+                }
+            }
             return $this->db->rowCount();
         }
         return false;
+    }
+
+    private function getLampiranSuratMasuk(int $id)
+    {
+        $this->db->query("SELECT * FROM {$this->surat_masuk_files_table} WHERE id = :id");
+        $this->db->bind('id', $id);
+        return $this->db->single();
+    }
+
+    private function hapusLampiranSuratMasuk(int $id)
+    {
+        $this->db->query("DELETE FROM {$this->surat_masuk_files_table} WHERE id = :id");
+        $this->db->bind('id', $id);
+        $this->db->execute();
+    }
+
+    private function salinLampiranSuratMasuk(array $lampiran)
+    {
+        $rel = $lampiran['path_file'] ?? '';
+        if (!$rel) {
+            return null;
+        }
+        $src = APPROOT . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . ltrim($rel, '/');
+        if (!is_file($src)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($src, PATHINFO_EXTENSION));
+        $namaFileUnik = uniqid('arsip-sm-') . ($ext ? '.' . $ext : '');
+        $destFolder = APPROOT . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'arsip';
+        if (!is_dir($destFolder)) {
+            @mkdir($destFolder, 0775, true);
+        }
+        $dest = $destFolder . DIRECTORY_SEPARATOR . $namaFileUnik;
+        if (!copy($src, $dest)) {
+            return null;
+        }
+        return [
+            'nama_asli' => $lampiran['nama_file_asli'] ?? $namaFileUnik,
+            'nama_unik' => $namaFileUnik,
+            'path'      => 'uploads/arsip/' . $namaFileUnik,
+            'ukuran'    => $lampiran['filesize'] ?? @filesize($dest),
+        ];
     }
 
     private function reArrayFiles(&$file_post) {
@@ -199,10 +320,10 @@ class Arsip_model {
         $tanggal_mulai = $data['tanggal_mulai'] ?? '';
         $tanggal_akhir = $data['tanggal_akhir'] ?? '';
 
-        $query = "SELECT a.*, k.nama_kategori, 
+        $query = "SELECT a.*, k.kode AS kode_kategori, CONCAT(k.kode, ' - ', k.nama_kategori) AS nama_kategori,
                   (SELECT COUNT(*) FROM {$this->files_table} WHERE id_arsip = a.id) as jumlah_file
                   FROM {$this->table} a
-                  JOIN kategori_arsip k ON a.id_kategori = k.id 
+                  JOIN kategori_arsip k ON a.id_kategori = k.id
                   WHERE a.judul LIKE :keyword";
 
         if (!empty($kategori)) {

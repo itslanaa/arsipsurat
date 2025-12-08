@@ -14,6 +14,7 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">No</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Kode</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Kategori</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Aksi</th>
                 </tr>
@@ -23,10 +24,11 @@
                 <?php foreach ($kategori as $kat) : ?>
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $no++; ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-800"><?= htmlspecialchars($kat['kode']); ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= htmlspecialchars($kat['nama_kategori']); ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button class="tombolEditKategori text-yellow-600 hover:text-yellow-900" data-id="<?= $kat['id']; ?>" title="Edit">
-                                <i class="fas fa-pencil-alt"></i> 
+                                <i class="fas fa-pencil-alt"></i>
                             </button>
                             <!-- === -->
                             <button type="button" 
@@ -59,6 +61,11 @@
             <form id="kategoriForm" action="" method="post">
                 <input type="hidden" id="kategoriId" name="id">
                 
+                <div class="mb-4">
+                    <label for="kode_kategori" class="block text-sm font-medium text-gray-700">Kode Klasifikasi</label>
+                    <input type="text" name="kode" id="kode_kategori" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Mis. 800.1" required>
+                </div>
+
                 <div>
                     <label for="nama_kategori" class="block text-sm font-medium text-gray-700">Nama Kategori</label>
                     <input type="text" name="nama_kategori" id="nama_kategori" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
@@ -87,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalTitle = document.getElementById('modalTitle');
     const kategoriForm = document.getElementById('kategoriForm');
     const kategoriIdInput = document.getElementById('kategoriId');
+    const kodeKategoriInput = document.getElementById('kode_kategori');
     const namaKategoriInput = document.getElementById('nama_kategori');
     const baseUrl = '<?= BASE_URL; ?>';
 
@@ -100,8 +108,9 @@ document.addEventListener('DOMContentLoaded', function() {
         modalTitle.innerText = 'Tambah Kategori Baru';
         kategoriForm.action = `${baseUrl}/kategori/store`;
         kategoriIdInput.value = '';
+        kodeKategoriInput.value = '';
         namaKategoriInput.value = '';
-        namaKategoriInput.focus();
+        kodeKategoriInput.focus();
         openModal();
     });
 
@@ -120,8 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalTitle.innerText = 'Edit Kategori';
                 kategoriForm.action = `${baseUrl}/kategori/update`;
                 kategoriIdInput.value = data.id;
+                kodeKategoriInput.value = data.kode;
                 namaKategoriInput.value = data.nama_kategori;
-                namaKategoriInput.focus();
+                kodeKategoriInput.focus();
                 openModal();
             } catch (error) {
                 console.error('Gagal mengambil data kategori:', error);
