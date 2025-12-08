@@ -33,6 +33,7 @@ class Surat extends Controller
 
         $data['surat_list'] = $this->model('Surat_model')->getSuratKeluar(50);
         $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
+        $data['arsip_map'] = $this->buildArsipMap($data['surat_list']);
         $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
 
 
@@ -313,6 +314,46 @@ class Surat extends Controller
         }
     }
 
+    public function archive()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        $idSurat = isset($_POST['surat_id']) ? (int)$_POST['surat_id'] : 0;
+        $idArsip = isset($_POST['arsip_id']) ? (int)$_POST['arsip_id'] : 0;
+
+        if ($idSurat <= 0 || $idArsip <= 0) {
+            Flasher::setFlash('Gagal', 'Arsip atau surat tidak valid.', 'danger');
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        $suratModel = $this->model('Surat_model');
+        $arsipModel = $this->model('Arsip_model');
+
+        $surat = $suratModel->getSuratKeluarById($idSurat);
+        $arsip = $arsipModel->getArsipById($idArsip);
+
+        if (!$surat || !$arsip) {
+            Flasher::setFlash('Gagal', 'Data surat atau arsip tidak ditemukan.', 'danger');
+            header('Location: ' . BASE_URL . '/surat');
+            exit;
+        }
+
+        $copied = $arsipModel->lampirkanSuratKeluar($arsip['id'], $surat);
+
+        if ($copied) {
+            Flasher::setFlash('Berhasil', 'File surat keluar berhasil diarsipkan.', 'success');
+        } else {
+            Flasher::setFlash('Gagal', 'File surat tidak dapat diarsipkan.', 'error');
+        }
+
+        header('Location: ' . BASE_URL . '/surat');
+        exit;
+    }
+
     public function delete($id)
     {
         $row = $this->model('Surat_model')->getSuratKeluarById((int)$id);
@@ -364,5 +405,16 @@ class Surat extends Controller
     private function currentUserId()
     {
         return $_SESSION['user_id']['id'] ?? $_SESSION['user_id'] ?? 0;
+    }
+
+    private function buildArsipMap(array $suratList)
+    {
+        $map = [];
+        $arsipModel = $this->model('Arsip_model');
+        $ids = array_unique(array_filter(array_column($suratList, 'id_surat_masuk')));
+        foreach ($ids as $idSm) {
+            $map[$idSm] = $arsipModel->getArsipBySuratMasuk((int)$idSm);
+        }
+        return $map;
     }
 }
