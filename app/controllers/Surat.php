@@ -13,7 +13,7 @@ class Surat extends Controller
             exit;
         }
 
-        if (in_array(currentRole(), ['camat', 'sekcam', 'unit'], true)) {
+        if (in_array(currentRole(), ['camat', 'sekcam'], true)) {
             header('Location: ' . BASE_URL . '/suratmasuk');
             exit;
         }
