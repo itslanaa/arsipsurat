@@ -40,7 +40,7 @@ class Surat extends Controller
         $data['surat_masuk_ref'] = $this->model('Suratmasuk_model')->getReferensiKeluar();
         $data['arsip_map'] = $this->buildArsipMap($data['surat_list']);
         $data['arsip_status'] = $this->buildArsipStatus($data['surat_list']);
-        $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
+        $data['unit_pengolah_options'] = ['Umpeg', 'Pemerintahan', 'Pemberdayaan Masyarakat', 'Trantib', 'Ekonomi Pembangunan'];
 
 
 

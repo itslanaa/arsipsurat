@@ -389,7 +389,7 @@ class Suratmasuk_model
             'staf' => ['Umpeg'],
             'kasipenkes' => ['Umpeg'],
             'kasipem' => ['Pemerintahan'],
-            'kasipm' => ['Pembangunan'],
+            'kasipm' => ['Pemberdayaan Masyarakat'],
             'kasitrantibum' => ['Trantib'],
             'kasiekbang' => ['Ekonomi Pembangunan'],
         ];
