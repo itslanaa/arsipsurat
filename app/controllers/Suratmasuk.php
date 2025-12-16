@@ -2,7 +2,7 @@
 
 class Suratmasuk extends Controller
 {
-    private array $unitOptions = ['Umpeg', 'Pemerintahan', 'Pembangunan', 'Trantib', 'Ekonomi Pembangunan'];
+    private array $unitOptions = ['Umpeg', 'Pemerintahan', 'Pemberdayaan Masyarakat', 'Trantib', 'Ekonomi Pembangunan'];
 
     public function __construct()
     {
